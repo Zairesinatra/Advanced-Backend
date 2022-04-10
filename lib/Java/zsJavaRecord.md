@@ -728,7 +728,7 @@ public class PersonTest {
 }
 ```
 
-![](/Users/xieziyi/zairesinatra/fullStack/Java/assets/转型.png)
+![](./assets/转型.png)
 
 ```java
 // 1.若子类重写了父类方法,就意味着子类里定义的方法彻底覆盖了父类里的同名方法,系统将不可能把父类里的方法转移到子类中
@@ -937,7 +937,7 @@ Java 提供了8种基本数据类型对应的包装类，使得基本数据类�
 
 ##### 包装类与基本数据类型相互转换
 
-![](/Users/xieziyi/zairesinatra/fullStack/Java/assets/包装类与基本数据类型相互转换.png)
+![](./assets/包装类与基本数据类型相互转换.png)
 
 ```java
 import org.junit.Test;
@@ -1876,7 +1876,7 @@ Collection 接口继承了 java.lang.Iterable 接口，该接口有一个 `itera
 
 **Iterator 仅用于遍历集合**，其本身并不提供承装对象的能力。如果需要创建 Iterator 对象，则必须有一个被迭代的集合。**集合对象每次调用 `iterator()` 方法都得到一个全新的迭代器对象**，<u>默认游标都在集合的第一个元素之前</u>。
 
-![](/Users/xieziyi/zairesinatra/fullStack/Java/assets/Iterator.png)
+![](./assets/Iterator.png)
 
 ```java
 import org.junit.Test;
@@ -2449,7 +2449,7 @@ JDK7 实例化一个 HashMap 时，系统会创建一个长度为 Capacity 的 E
 
 当 HashMap 中的元素越来越多的时候，hash 冲突的几率也就越来越高，因数组的长度是固定的。为提高查询效率，要对 HashMap 的数组进行扩容，而在数组扩容之后原数组中的数据必须重新计算其在新数组中的位置，这就是最消耗性能的 resize。
 
-![](/Users/xieziyi/zairesinatra/fullStack/Java/assets/HashMap.png)
+![](./assets/HashMap.png)
 
 当 HashMap 中的元素个数超过 `数组大小*loadFactor` 时，就会进行数组扩容，loadFactor 的默认值 DEFAULT_LOAD_FACTOR 为0.75。默认情况，数组 DEFAULT_INITIAL_CAPACITY 为16，那么当 HashMap 中元素个数超过临界值 threshold 16\*0.75=12的时候，就把数组的大小扩展一倍，为2*16=32，然后重新计算每个元素在数组中的位置，这是一个非常消耗性能的操作，所以如果已经预知 HashMap 中元素的个数，那么预设元素的个数能够有效的提高 HashMap 的性能。
 
@@ -2860,7 +2860,7 @@ public class CollectionTest {
 
 Enumeration 接口是 Iterator 迭代器的“古老版本”。
 
-![](/Users/xieziyi/zairesinatra/fullStack/Java/assets/Enumeration.png)
+![](./assets/Enumeration.png)
 
 ```java
 Enumeration stringEnum = new StringTokenizer("a-b*c-d-e-g", "-");
@@ -3480,7 +3480,7 @@ I/O 用于处理设备之间的数据传输。如读/写文件，网络通讯等
 
 Java 的 IO 流共涉及40多个类，实际上非常规则，都是从4个抽象基类派生的。由这四个类派生出来的子类名称都是以其父类名作为子类名后缀。
 
-![](/Users/xieziyi/zairesinatra/fullStack/Java/assets/IO流体系.png)
+![](./assets/IO流体系.png)
 
 #### 节点流|文件流
 
@@ -3502,6 +3502,4 @@ fr.close();
 垃圾回收机制只回收 JVM 对内存的对象空间。对于其他的数据库、输入输出流、Socket物理连接无力，故需要手动关闭。
 
 在抛出异常时，建议使用 try-catch，因在使用流时，若因调用 read 导致阻塞出现，可能出现 IOExcerption 异常，在创建异常对象后因是运行时异常就会抛出，导致后面程序不执行，那么就会使流未关闭，存在资源浪费的泄漏问题。
-
-upiudu1
 
