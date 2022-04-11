@@ -779,15 +779,16 @@ wait()、notify()、notifyAll()
 
 equals 方法
 
-- equals 是一个方法，而非运算符，只能适用于引用数据类型。
+* equals 是一个方法，而非运算符，只能适用于引用数据类型。
 
-- Object 类中定义的 `equals()` 和 == 的作用是相同的，比较两个对象的地址值是否相同，即两个引用是否指向同一个对象实体。
+* Object 类中定义的 `equals()` 和 == 的作用是相同的，比较两个对象的地址值是否相同，即两个引用是否指向同一个对象实体。
   
   ```java
   public boolean equals(Object obj){
     return (this == obj);
   }
   ```
+
 * String、Date、File、包装类等都重写了 Object 类中的 `equals()` 方法。不再是比较两个引用的地址是否相同，而是比较两个对象的 “实体内容” 是否相同，也是重写的原则。
 
 ```java
@@ -836,11 +837,11 @@ public class EqualsTest {
 
 ##### 重写 equals 方法的原则
 
-- 对称性：若 `x.equals(y)` 返回 true，那么 `y.equals(x)` 也应返回 true。
-- 自反性：`x.equals(x)` 必须返回 true。
-- 传递性：如果 `x.equals(y)` 返回是 true，且 `y.equals(z)` 返回是 true，那么 `z.equals(x)` 也应该返回是 true。
-- 一致性：如果 `x.equals(y)` 返回是 true，只要 x 和 y 内容一直不变，不管重复 `x.equals(y)` 多少次，返回都是 true。
-- 任何情况下，`x.equals(null)`，永远返回是 false；`x.equals(和x不同类型的对象)` 永远返回是 false。
+* 对称性：若 `x.equals(y)` 返回 true，那么 `y.equals(x)` 也应返回 true。
+* 自反性：`x.equals(x)` 必须返回 true。
+* 传递性：如果 `x.equals(y)` 返回是 true，且 `y.equals(z)` 返回是 true，那么 `z.equals(x)` 也应该返回是 true。
+* 一致性：如果 `x.equals(y)` 返回是 true，只要 x 和 y 内容一直不变，不管重复 `x.equals(y)` 多少次，返回都是 true。
+* 任何情况下，`x.equals(null)`，永远返回是 false；`x.equals(和x不同类型的对象)` 永远返回是 false。
 
 ```java
     int it = 65;
@@ -1733,10 +1734,10 @@ public class StringTest1 {
 
 Java 集合可分为 `Collection` 和 `Map` 两种体系。
 
-- `Collection` 接口：单列数据，定义了存取一组对象的方法的集合。
-  - `List`：元素有序、可重复的集合。ArrayList、LinkedList、Vector。
-  - `Set`：元素无序、不可重复的集合。HashSet、LinkedHashSet、TreeSet。
-- `Map` 接口：双列数据，保存具有映射关系 "key-value 对" 的集合。HashMap、LinkedHashMap、TreeMap、Hashtable、Properties。
+* `Collection` 接口：单列数据，定义了存取一组对象的方法的集合。
+  * `List`：元素有序、可重复的集合。ArrayList、LinkedList、Vector。
+  * `Set`：元素无序、不可重复的集合。HashSet、LinkedHashSet、TreeSet。
+* `Map` 接口：双列数据，保存具有映射关系 "key-value 对" 的集合。HashMap、LinkedHashMap、TreeMap、Hashtable、Properties。
 
 #### Collection 接口
 
@@ -1930,8 +1931,8 @@ public class IteratorTest {
 }
 ```
 
-- Iterator可以删除集合的元素，但是是遍历过程中通过迭代器对象的remove方法，不是集合对象的remove方法。
-- **如果还未调用next()或在上一次调用next方法之后已经调用了remove方法，再调用remove都会报IllegalStateException**。
+* Iterator可以删除集合的元素，但是是遍历过程中通过迭代器对象的remove方法，不是集合对象的remove方法。
+* **如果还未调用next()或在上一次调用next方法之后已经调用了remove方法，再调用remove都会报IllegalStateException**。
 
 #### foreach 循环遍历集合或数组
 
@@ -1949,7 +1950,7 @@ for(Object obj: objs){ // (要遍历的元素类型 遍历后自定义元素的�
 
 ArrayList 作为 List 接口的主要实现类，虽线程不安全的，但是效率高；底层使用 `Object[] elementData` 存储。使用 LinkedList 对于频繁的插入、删除操作，效率比 ArrayList 高，其底层使用双向链表存储。Vector 作为 List 接口的古老实现类；线程安全的，效率低；底层使用 `Object[] elementData` 存储。
 
-- ArrayList 的源码分析
+* ArrayList 的源码分析
 
 ArrayList 是List 接口的典型实现类、主要实现类。本质上 ArrayList 是对象引用的一个”变长”数组。
 
@@ -1970,7 +1971,7 @@ list.add(123); // 第一次调用add()时，底层才创建了长度10的数组�
 // jdk7中的ArrayList的对象的创建类似于单例的饿汉式，而jdk8中的ArrayList的对象的创建类似于单例的懒汉式，延迟了数组的创建，节省内存。
 ```
 
-- LinkedList 的源码分析
+* LinkedList 的源码分析
 
 对于频繁的插入或删除元素的操作，建议使用 LinkedList 类，效率较高。LinkedList 为双向链表，内部没有声明数组，而是定义了 Node 类型的 first 和 last，用于记录首末元素。同时，定义内部类 Node 作为 LinkedList 中保存数据的基本结构。
 
@@ -1990,7 +1991,7 @@ private static class Node<E> {
 }
 ```
 
-- Vector 的源码分析
+* Vector 的源码分析
 
 Vector 是一个 JDK1.0 的古老集合。大多数操作与 ArrayList 相同，区别之处在于 Vector 是线程安全的。在各种 list 中，最好把 ArrayList 作为缺省选择。当插入、删除频繁时，使用 LinkedList；Vector 总是比 ArrayList 慢，所以尽量避免使用。
 
@@ -2198,7 +2199,7 @@ public class SetTest {
 }
 ```
 
-- HashSet 中元素的添加过程
+* HashSet 中元素的添加过程
 
 HashSet 是 Set 接口的典型实现，大多数时候使用 Set 集合时都使用这个实现类。HashSet 按 Hash 算法来存储集合中的元素，因此具有很好的存取、查找、删除性能。
 
@@ -2208,7 +2209,7 @@ HashSet 不能保证元素的排列顺序且不是线程安全的，集合元素
 
 HashSet 中添加元素 a，首先调用其所在类的 `hashCode()` 方法计算元素 a 的哈希值，此哈希值接着通过算法计算出在 HashSet 底层数组中的存放位置即索引位置，并判断数组此位置上是否已有元素。若此位置没有其他元素，则元素 a 添加成功；如果此位置上有其他元素 b 或以链表形式存在的多个元素，则比较元素 a 与元素 b 的 hash 值，若 hash 值不相同，则元素 a 添加成功；如果 hash 值相同，则需要调用元素 a 所在类的 `equals()` 方法，返回 true 则元素 a 添加失败，返回 false 则元素 a 添加成功。对于添加成功的情况，元素 a 与已经存在指定索引位置上数据以链表的方式存储。在 JDK7 中元素 a 放到数组中，指向原来的元素；而在 JDK8 中原来的元素在数组中指向元素 a。总结为<u>七上八下，底层为数组与链表</u>。
 
-- hashCode 和 equals 的重写
+* hashCode 和 equals 的重写
 
 在程序运行时，同一个对象多次调用 `hashCode()` 方法应该返回相同的值。当两个对象的 `equals()` 方法比较返回 true 时，这两个对象的 `hashCode()` 方法的返回值也应相等。对象中用作 `equals()`  方法比较的 Field，都应该用来计算 `hashCode` 值。
 
@@ -2220,11 +2221,11 @@ HashSet 中添加元素 a，首先调用其所在类的 `hashCode()` 方法计�
 
 <u>为什么用 Eclipse/IDEA 复写 hashCode 方法时有31这个数字？</u>这是因为选择系数的时候要选择尽量大的系数。因为如果计算出来的 hash 地址越大，所谓的“冲突”就越少，查找起来效率也会提高（减少冲突）。并且31只占用5bits，相乘造成数据溢出的概率较小。现在很多虚拟机里面都有做相关优化（提高算法效率），31可以由 `i*31== (i<<5)-1` 来表示。31是一个素数，素数作用就是若用一个数字来乘以这个素数，那么最终出来的结果只能被素数本身和被乘数还有1来整除。
 
-- LinkedHashSet 的使用
+* LinkedHashSet 的使用
 
 不允许集合元素重复的 LinkedHashSet 是 HashSet 的子类，LinkedHashSet 是根据元素的 hashCode 值来决定元素的存储位置，但同时使用双向链表维护元素的次序，这使得元素看起来是以插入顺序保存。LinkedHashSet 插入性能略低于 HashSet，但在迭代访问 Set 里的全部元素时有很好的性能，这是因为 LinkedHashSet 在添加数据的同时，每个数据还维护了两个引用，记录此数据前一个数据和后一个数据。
 
-- TreeSet 的使用
+* TreeSet 的使用
 
 TreeSet 是 SortedSet 接口的实现类，可以确保集合元素处于排序状态，底层使用**红黑树**结构存储数据。新增方法 `Comparator comparator()`、`Object first()|last()`、`Object lower|higher(Object e)`、`SortedSet subSet(fromElement, toElement)`、`SortedSet headSet|tailSet(toElement)`。
 
@@ -2396,7 +2397,7 @@ public class User implements Comparable{
 }
 ```
 
-- Set 面试题
+* Set 面试题
 
 ```java
 // 在List内去除重复数字值，要求尽量简单
@@ -2433,11 +2434,11 @@ public class InterviewTest {
 
 Map 存储双列数据，即 key-value 对，作为 Map 的主要实现类，虽线程是不安全的，但效率高，可以存储 null 的 key 和 value。LinkedHashMap 保证在遍历 map 元素时，可以按照添加的顺序实现遍历，原因是在原有的 HashMap 底层结构基础上添加了一对指针，指向前一个和后一个元素，故在频繁的遍历操作时此类执行效率高于 HashMap。TreeMap 保证按照添加的 key-value 对进行排序，实现排序遍历。此时考虑 key 的自然排序或定制排序，其底层使用红黑树。Hashtable 作为古老的实现类，尽管线程安全，但效率低；不能存储 null 的 key 和 value。Properties 常用来处理配置文件，其存储元素 key 和 value 都是 String 类型。HashMap的底层在 JDK7 及其之前为数组与链表，JDK8后为数组、链表与红黑树。
 
-- Map 中存储的 key-value 特点
+* Map 中存储的 key-value 特点
 
 Map 与 Collection 并列存在。用于保存具有映射关系的数据 key-value。Map 中的 key 和 value 都可以是任何引用类型的数据。Map 中的 key  用 Set 来存放，不允许重复，即同一个 Map 对象所对应的类，须重写 `hashCode()` 和 `equals()` 方法。常用 String 类作为 Map 的“键”。key 和 value 之间存在单向一对一关系，即通过指定的 key 总能找到唯一的、确定的 value。Map 中的 value 是无序的、可重复的，使用 Collection 存储所有的 value，但其所在类需重写 equals。一个键值对构成一个无序、不可重复的 Entry 对象，使用 Set 存储。
 
-- HashMap
+* HashMap
 
 HashMap 是 Map 接口使用频率最高的实现类，键和值允许使用 null，与 HashSet 一样不保证映射的顺序。所有的 key 构成的集合是无序、不可重复的 Set。所以 key 所在的类要重写 `equals()` 和 `hashCode()`。所有的 value 构成的集合是无序可重复的 Collection，故 value 所在的类要重写 `equals()`。一个 key-value 构成一个 entry，所有 entry 构成的集合是无序不可重复的 Set。HashMap 判断两个 key 相等的标准是两个 key 通过 `equals()` 方法返回 true，且 hashCode 值也相等。HashMap 判断两个 value 相等的标准是两个 value 通过 `equals()` 方法返回 true。
 
@@ -2470,7 +2471,7 @@ JDK8 相较于 JDK7 在底层实现方面的不同体现在 new HashMap 底层�
 */
 ```
 
-- LinkedHashMap
+* LinkedHashMap
 
 LinkedHashMap 是 HashMap 的子类，在 HashMap 的存储结构基础上，使用了一对双向链表来记录添加元素的顺序。与 LinkedHashSet 类似，LinkedHashMap 可以维护 Map 的迭代顺序与 Key-Value 的插入顺序一致。
 
@@ -2606,7 +2607,7 @@ public class MapTest {
 
 HashMap 与 Hashtable 都实现了 Map 接口。由于前者的非线程安全性，效率上可能高于 后者。Hashtable 的方法是 Synchronize 的，在多个线程访问 Hashtable 时，不需要为其的方法实现同步；而 HashMap 不是，必须为之提供外同步。HashMap 允许将 null 作为一个 Entry 的 key 或者 value，但 Hashtable 不允许。HashMap 把 Hashtable 的 contains 方法改成 containsvalue 和 containsKey，只因 contains 方法容易引起误解。Hashtable 继承自 Dictionary 类，而 HashMap 是 Java1.2 引进的 Map interface 的一个实现。Hashtable 和 HashMap 采用的 hash/rehash 算法大体一样，故性能没有很大的差异。
 
-- TreeMap
+* TreeMap
 
 底层使用**红黑树**结构存储数据的 TreeMap 存储 Key-Value 对时，需根据 Key-Value 对进行排序，保证所有的 Key-Value 对处于有序状态。TreeMap 的 Key 排序有自然排序和定制排序。前者所有 key 必须实现 Comparable 接口，且所有的 Key 应该是同一个类的对象，否则抛出 ClassCastException。后者在创建 TreeMap 时传入一个 Comparator 对象，该对象负责对 TreeMap 中所有 Key 进行排序，此时不需要实现 Comparable 接口。TreeMap 判断两个 Key 相等的标准是通过 `compareTo()` 或 `compare()` 方法返回0。
 
@@ -2756,11 +2757,11 @@ public class TreeMapTest {
 }
 ```
 
-- Hashtable
+* Hashtable
 
 Hashtable 是个 JDK1.0 就提供的古老 Map 实现类，不同于 HashMap，Hashtable 是线程安全的。Hashtable 和  HashMap实现原理相同，底层都是用哈希表结构，常可以互用。与 HashMap 不同的是，Hashtable 不允许使用 null 作为 key 和 value；与 HashMap 相同的是，Hashtable 也不能保证其中 Key-Value 对顺序。在判断两个 Key 和 Value 相等的标准与 HashMap 一致。
 
-- Properties
+* Properties
 
 Properties 类是 Hashtable 的子类，常用于处理属性文件。由于属性文件里的 key、value 都是字符串类型，故 Properties 里的 key 和 value 都是字符串类型。存取数据时，建议使用`setProperty(String key,Stringvalue)`和`getProperty(String key)`方法。
 
@@ -3270,7 +3271,7 @@ public static void main(String[] args) {
 
 #### File 类使用
 
-- 实例化
+* 实例化
 
 java.io.File 类的一个对象，<u>代表一个文件或文件目录</u>，与平台无关。File 能新建、删除、重命名文件和目录，但 File 不能访问文件内容本身。如果需要访问文件内容本身，则需要使用输入/输出流。想要在 Java 程序中表示一个真实存在的文件或目录，那么必须有一个 File 对象，但是 Java 程序中的一个 File 对象，可能没有一个真实存在的文件或目录。File 对象可以作为参数传递给流的构造器。
 
@@ -3315,7 +3316,7 @@ public class FileTest {
 File file = new File("d:" + File.separator + "Backend" + File.separator + "info.txt");
 ```
 
-- File 类的常用方法
+* File 类的常用方法
 
 ```java
 import org.junit.Test;
@@ -3465,11 +3466,11 @@ public class FileTest {
 
 #### IO 流原理及流的分类
 
-- IO 流原理
+* IO 流原理
 
 I/O 用于处理设备之间的数据传输。如读/写文件，网络通讯等。Java 中对于数据的输入/输出操作以“流(stream)”的方式进行。java.io包下提供了各种“流”类和接口，用以获取不同种类的数据，并通过标准的方法输入或输出数据。输入 input 读取外部数据（磁盘、光盘等存储设备的数据）到程序（内存）中。输出 output 将程序（内存）数据输出到磁盘、光盘等存储设备中。
 
-- 流的分类
+* 流的分类
 
 按操作**数据单位**不同分为8 bit字节流，16 bit字符流；按数据流的**流向**不同分为输入流，输出流；按流的**角色**的不同分为节点流，处理流。
 
@@ -3480,11 +3481,11 @@ I/O 用于处理设备之间的数据传输。如读/写文件，网络通讯等
 
 Java 的 IO 流共涉及40多个类，实际上非常规则，都是从4个抽象基类派生的。由这四个类派生出来的子类名称都是以其父类名作为子类名后缀。
 
-![](./assets/IO流体系.png)
+![IO流体系](./assets/IO流体系.png)
 
 #### 节点流|文件流
 
-- FileReader 读入数据
+* FileReader 读入数据
 
 ```java
 // 建立一个流对象,将已存在的一个文件加载进流
@@ -3503,3 +3504,378 @@ fr.close();
 
 在抛出异常时，建议使用 try-catch，因在使用流时，若因调用 read 导致阻塞出现，可能出现 IOExcerption 异常，在创建异常对象后因是运行时异常就会抛出，导致后面程序不执行，那么就会使流未关闭，存在资源浪费的泄漏问题。
 
+```java
+import org.junit.Test;
+
+import java.io.*;
+
+/**
+ * 一、流的分类
+ * 1.操作数据单位:字节流、字符流
+ * 2.数据的流向:输入流、输出流
+ * 3.流的角色:节点流、处理流
+ *
+ * 二、流的体系结构
+ * 抽象基类         节点流(或文件流)                                  缓冲流(处理流的一种)
+ * InputStream     FileInputStream   (read(byte[] buffer))        BufferedInputStream (read(byte[] buffer))
+ * OutputStream    FileOutputStream  (write(byte[] buffer,0,len)  BufferedOutputStream (write(byte[] buffer,0,len) / flush()
+ * Reader          FileReader (read(char[] cbuf))                 BufferedReader (read(char[] cbuf) / readLine())
+ * Writer          FileWriter (write(char[] cbuf,0,len)           BufferedWriter (write(char[] cbuf,0,len) / flush()
+ */
+public class FileReaderWriterTest {
+
+    /**
+     * 1. read()返回读入的一个字符.如果达到文件末尾,返回-1
+     * 2. 异常的处理:为了保证流资源一定可以执行关闭操作.需要使用try-catch-finally处理
+     * 3. 读入的文件一定要存在,否则就会报FileNotFoundException
+     */
+    @Test
+    public void test1(){
+        FileReader fr = null;
+        try {
+            // 实例化File对象,指明要操作的文件
+            File file = new File("./src/com/.../IO/helloIO.txt");
+            // 提供具体的流
+            fr = new FileReader(file);
+
+            // 3.数据的读入过程
+            // read()返回读入的一个字符,如果达到文件末尾,返回-1.
+            // 方式一:
+        int data = fr.read();
+        while(data != -1){
+            System.out.print((char) data);
+            data = fr.read();
+        }
+
+            // 方式二:语法上针对于方式一的修改
+//            int data;
+//            while((data = fr.read()) != -1){
+//                System.out.print((char) data);
+//            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            // 流的关闭操作
+//            try {
+//                if(fr != null)
+            // 此时若 fr 对象未实例化就 close 会出现空指针问题
+//                    fr.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+
+            // 或
+            if(fr != null){
+                try {
+                    fr.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
+    // 对read()操作升级 => 使用read的重载方法
+    @Test
+    public void test2(){
+        FileReader fr = null;
+        try {
+            // 1.File类的实例化
+            File file = new File("./src/com/.../IO/helloIO.txt");
+
+            // 2.FileReader流的实例化
+            fr = new FileReader(file);
+
+            // 3.读入的操作
+            // read(char[] cbuf) => 返回每次读入cbuf数组中的字符的个数.如果达到文件末尾,返回-1
+            char[] cbuf = new char[5];
+            // char类型也对应一个int类型 => a = 97
+            int len;
+
+            while((len = fr.read(cbuf)) != -1){
+                // 方式一
+                // 错误的写法 => 若len不足cbuf.length会导致上次部分索引处数据未覆盖而读出
+//                for(int i = 0;i < cbuf.length;i++){
+//                    System.out.print(cbuf[i]);
+//                }
+                // 正确的写法
+//                for(int i = 0;i < len;i++){
+//                    System.out.print(cbuf[i]);
+//                }
+
+                // 方式二
+                // 错误的写法,对应着方式一的错误的写法
+//                String str = new String(cbuf);
+//                System.out.print(str);
+                // 正确的写法
+                String str = new String(cbuf,0,len);
+                System.out.print(str);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if(fr != null){
+                // 4.资源的关闭
+                try {
+                    fr.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+    }
+}
+```
+
+* FileWriter 写出数据
+
+```java
+// 创建流对象,建立数据存放文件
+FileWriterfw= new FileWriter(new File("Test.txt"));
+// 调用流对象的写入方法，将数据写入流
+fw.write("write something");
+// 关闭流资源,并将流中的数据清空到文件中
+fw.close();
+```
+
+```java
+import org.junit.Test;
+
+import java.io.*;
+
+public class FileReaderWriterTest {
+    /**
+     * 从内存中写出数据到硬盘的文件里
+     * 说明:
+     * 1.输出操作,对应的File可以不存在,并不会报异常
+     * 2.
+     *   File对应的硬盘中的文件如果不存在,在输出的过程中,会自动创建此文件.
+     *   File对应的硬盘中的文件如果存在
+     *       如果流使用的构造器 => FileWriter(file,false) / FileWriter(file):对原有文件的覆盖
+     *       如果流使用的构造器是 => FileWriter(file,true):不会对原有文件覆盖,而是在原有文件基础上追加内容
+     */
+    @Test
+    public void test3(){
+        FileWriter fw = null;
+        try {
+            // 提供File类的对象,指明写出到的文件
+            File file = new File("./src/com/.../IO/helloIO.txt");
+
+            // 提供FileWriter的对象,用于数据的写出
+            fw = new FileWriter(file,true);
+
+            // 写出的操作
+            fw.write("I have a dream!\n");
+            fw.write("you need to have a dream!");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // 流资源的关闭
+            if(fw != null){
+                try {
+                    fw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
+```
+
+* FileReader 和 FileWriter 实现文本文件的复制
+
+```java
+import org.junit.Test;
+
+import java.io.*;
+
+public class FileReaderWriterTest {
+    // 使用FileInputStream和FileOutputStream读写非文本文件
+    @Test
+    public void test4() {
+        FileReader fr = null;
+        FileWriter fw = null;
+        try {
+            // 1.创建File类的对象，指明读入和写出的文件
+            File srcFile = new File("./src/com/.../IO/helloIO.txt");
+            File srcFile2 = new File("./src/com/.../IO/helloIO.txt");
+
+            // 不能使用字符流来处理图片等字节数据
+//            File srcFile = new File("假装有图片.jpg");
+//            File srcFile2 = new File("假装有图片1.jpg");
+
+            // 2.创建输入流和输出流的对象
+            fr = new FileReader(srcFile);
+            fw = new FileWriter(srcFile2);
+
+            //3.数据的读入和写出操作
+            char[] cbuf = new char[5];
+            int len; // 记录每次读入到cbuf数组中的字符的个数
+            while((len = fr.read(cbuf)) != -1){
+                // 每次写出len个字符
+                fw.write(cbuf,0,len);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // 4.关闭流资源
+            // 方式一
+//            try {
+//                if(fw != null)
+//                    fw.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }finally{
+//                try {
+//                    if(fr != null)
+//                        fr.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+            // 方式二
+            try {
+                if(fw != null){
+                    fw.close();}
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if(fr != null){
+                    fr.close();}
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+
+* 使用FileInputStream不能读取文本文件
+
+```java
+import org.junit.Test;
+
+import java.io.*;
+
+public class FileReaderWriterTest {
+    /**
+     * 测试FileInputStream和FileOutputStream的使用
+     *
+     * 结论
+     *    1. 对于文本文件(.txt,.java,.c,.cpp)，使用字符流处理
+     *    2. 对于非文本文件(.jpg,.mp3,.mp4,.avi,.doc,.ppt,...)，使用字节流处理
+     */
+    @Test
+    public void testFileInputStream(){
+        FileInputStream fis = null;
+        try {
+            // 1.造文件
+            File file = new File("./src/com/.../IO/helloIO.txt");
+
+            // 2.造流
+            fis = new FileInputStream(file);
+
+            // 3.读数据
+            byte[] buffer = new byte[5];
+            int len; // 记录每次读取的字节的个数
+            while((len = fis.read(buffer)) != -1){
+                String str = new String(buffer,0,len);
+                // 中文三个字节,英文一个字节 => 有中文则有概率乱码
+                System.out.print(str);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if(fis != null) {
+                //4.关闭资源
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
+```
+
+* FileInputStream 和 FileOutputStream 读写非文本文件
+
+```java
+import org.junit.Test;
+
+import java.io.*;
+
+public class FileReaderWriterTest {
+    /**
+     * 实现对图片的复制操作
+     */
+    @Test
+    public void testFileInputOutputStream()  {
+        FileInputStream fis = null;
+        FileOutputStream fos = null;
+        try {
+            // 1.造文件
+            File srcFile = new File("./src/com/zairesinatra/IO/假装有图片.jpeg");
+            File destFile = new File("./src/com/zairesinatra/IO/假装有图片2.jpeg");
+
+            // 2.造流
+            fis = new FileInputStream(srcFile);
+            fos = new FileOutputStream(destFile);
+
+            // 3.复制的过程
+            byte[] buffer = new byte[5];
+            int len;
+            //4.读数据
+            while((len = fis.read(buffer)) != -1){
+                fos.write(buffer,0,len);
+            }
+            System.out.println("复制成功");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(fos != null){
+                //5.关闭资源
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(fis != null){
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+    }
+}
+```
+
+#### 缓冲流
+
+为提高数据读写的速度，Java API 提供了带缓冲功能的流类，在使用这些流类时，会创建一个内部缓冲区数组，缺省使用8192个字节(8Kb)的缓冲区。
+
+```java
+public class BufferedInputStream extends FilterInputStream {
+    private static int DEFAULT_BUFFER_SIZE = 8192;
+}
+```
+
+冲流要“套接”在相应的节点流之上，根据数据操作单位可以把缓冲流分为 BufferedInputStream 和 BufferedOutputStream 组和 BufferedReader 和 BufferedWriter 组。当读取数据时，数据按块读入缓冲区，其后的读操作则直接访问缓冲区。当使用 BufferedInputStream 读取字节文件时，BufferedInputStream 会一次性从文件中读取8192个(8Kb)，存在缓冲区中，直到缓冲区装满了，才重新从文件中读取下一个8192个字节数组。向流中写入字节时，不会直接写到文件，先写到缓冲区中直到缓冲区写满，BufferedOutputStream 才会把缓冲区中的数据一次性写到文件里。使用方法 `flush()` 可以强制将缓冲区的内容全部写入输出流。关闭流的顺序和打开流的顺序相反。只要关闭最外层流即可，关闭最外层流也会相应关闭内层节点流。`flush()` 方法的使用是手动将 buffer 中内容写入文件。如果是带缓冲区的流对象的 `close()` 方法，不但会关闭流，还会在关闭流之前刷新缓冲区，关闭后不能再写出。
+
+![IO流体系](./assets/缓冲区.png)
+
+* 缓冲流(字节型)实现非文本文件的复制
+
+```java
+
+```
