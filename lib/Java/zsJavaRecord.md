@@ -3821,8 +3821,8 @@ public class FileReaderWriterTest {
         FileOutputStream fos = null;
         try {
             // 1.造文件
-            File srcFile = new File("./src/com/zairesinatra/IO/假装有图片.jpeg");
-            File destFile = new File("./src/com/zairesinatra/IO/假装有图片2.jpeg");
+            File srcFile = new File("./src/com/.../IO/假装有图片.jpeg");
+            File destFile = new File("./src/com/.../IO/假装有图片2.jpeg");
 
             // 2.造流
             fis = new FileInputStream(srcFile);
@@ -3877,5 +3877,1336 @@ public class BufferedInputStream extends FilterInputStream {
 * 缓冲流(字节型)实现非文本文件的复制
 
 ```java
+import org.junit.Test;
 
+import java.io.*;
+
+/**
+ * 处理流之缓冲流的使用
+ *
+ *  1.缓冲流
+ *  BufferedInputStream
+ *  BufferedOutputStream
+ *  BufferedReader
+ *  BufferedWriter
+ */
+public class BufferedTest {
+    /**
+     * 实现非文本文件的复制
+     */
+    @Test
+    public void BufferedStreamTest(){
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+        try {
+            // 1.造文件
+            File srcFile = new File("./src/com/.../IO/假装有图片.jpeg");
+            File destFile = new File("./src/com/.../IO/假装有图片3.jpeg");
+            // 2.造流
+            // 2.1 造节点流
+            FileInputStream fis = new FileInputStream((srcFile));
+            FileOutputStream fos = new FileOutputStream(destFile);
+            // 2.2 造缓冲流
+            bis = new BufferedInputStream(fis);
+            bos = new BufferedOutputStream(fos);
+
+            // 3.复制 => 读取、写入
+            byte[] buffer = new byte[10];
+            int len;
+            while((len = bis.read(buffer)) != -1){
+                bos.write(buffer,0,len);
+//                bos.flush();//刷新缓冲区
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            //4.资源关闭
+            //要求：先关闭外层的流，再关闭内层的流
+            if(bos != null){
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            if(bis != null){
+                try {
+                    bis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            // 关闭外层流的同时,内层流也会自动的进行关闭.内层流的关闭可以省略.
+//        fos.close();
+//        fis.close();
+        }
+    }
+}
+```
+
+* 缓冲流(字符型)实现文本文件的复制
+
+```java
+import org.junit.Test;
+
+import java.io.*;
+
+public class BufferedTest {
+    @Test
+    public void copyTest(){
+        BufferedReader br = null;
+        BufferedWriter bw = null;
+        try {
+            // 创建文件和相应的流
+            br = new BufferedReader(new FileReader(new File("./src/com/.../IO/helloIO.txt")));
+            bw = new BufferedWriter(new FileWriter(new File("./src/com/.../IO/helloIO1.txt")));
+
+            // 读写操作
+            // 方式一 => 使用char[]数组
+//            char[] cbuf = new char[1024];
+//            int len;
+//            while((len = br.read(cbuf)) != -1){
+//                bw.write(cbuf,0,len);
+//    //            bw.flush();
+//            }
+
+            // 方式二 => 使用String
+            String data;
+            while((data = br.readLine()) != null){
+                // 方法一
+//                bw.write(data + "\n"); // data中不包含换行符
+                // 方法二
+                bw.write(data); // data中不包含换行符
+                bw.newLine(); // 提供换行的操作
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            //关闭资源
+            if(bw != null){
+                try {
+                    bw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(br != null){
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
+```
+
+#### 转换流
+
+转换流提供了在字节流和字符流之间的转换。InputStreamReader 将 InputStream转换为Reader 实现将字节的输入流按指定字符集转换为字符的输入流，需要和 InputStream “套接”。OutputStreamWriter 将 Writer 转换为 OutputStream 实现将字符的输出流按指定字符集转换为字节的输出流，需要和 OutputStream “套接”。
+
+```java
+public InputStreamReader(InputStream);
+public InputStreamReader(InputStream, Charset);
+public OutputStreamWriter(OutputStream)
+public OutputSreamWriter(OutputStream, Charset);
+```
+
+字节流中的数据都是字符时，转成字符流操作更高效。很多时候使用转换流来处理文件乱码问题。实现编码和解码的功能。
+
+![转换流](./assets/转换流.png)
+
+```java
+import org.junit.Test;
+
+import java.io.*;
+
+/**
+ * 处理流之转换流的使用
+ * 1.转换流属于字符流
+ *      InputStreamReader => 将一个字节的输入流转换为字符的输入流
+ *      OutputStreamWriter => 将一个字符的输出流转换为字节的输出流
+ *
+ * 2.提供字节流与字符流之间的转换
+ *
+ * 3.解码：字节、字节数组 => 字符数组、字符串
+ *   编码：字符数组、字符串 => 字节、字节数组
+ *
+ * 4.字符集
+ */
+public class InputStreamReaderTest {
+    /**
+     * 此时处理异常的话，仍然应该使用try-catch-finally
+     * 综合使用InputStreamReader和OutputStreamWriter
+     */
+    @Test
+    public void test1() throws IOException {
+        // 1.造文件、造流
+        File file1 = new File("./src/com/.../IO/helloIO.txt");
+        File file2 = new File("./src/com/.../IO/helloIO1.txt");
+
+        FileInputStream fis = new FileInputStream(file1);
+        FileOutputStream fos = new FileOutputStream(file2);
+
+        InputStreamReader isr = new InputStreamReader(fis,"utf-8");
+        OutputStreamWriter osw = new OutputStreamWriter(fos,"gbk");
+
+        // 2.读写过程
+        char[] cbuf = new char[20];
+        int len;
+        while((len = isr.read(cbuf)) != -1){
+            osw.write(cbuf,0,len);
+        }
+
+        // 3.关闭资源
+        isr.close();
+        osw.close();
+    }
+}
+```
+
+* 字符编码集
+
+计算机只识别二进制数据，早期由来是电信号。为了方便应用计算机识别各个国家的文字,就将各个国家的文字用数字来一一对应表示，形成一张表。这就是编码表。
+
+ASCII 占一个字节，即8位。其实只使用7位，即128个数。在 GB2312 和 GBK 都兼容 ASCII，GBK 包含繁体等其他更多的文字。在判断整体代表一个字符或者两个字符时，根据首字节的首位如果是0则8位表示一个字符，如果最高位是1，代表一个字节不够，使用两个字节表示一个字符。世界各国的字符集 Unicode 融入所有语言涉及到的字符，让其都有对应的数值。为每个字符分配唯一的字符码，所有文字都用两个字节表示。在内存层面存储 Unicode 没有问题，但是具体在底层文件中存在问题。在纯中文情况下可以考虑使用最高位判断，但在聚集全球所有文字的情况下，两字节需要消耗一位去判断字符会导致存放不够，即2^16可行，2^15不可行。
+
+面向传输的 UTF (UCS Transfer Format) 标准顾名思义，UTF-8 每次8个位传输数据，而 UTF-16 就是每次16个位。这是为传输而设计的编码，并使编码无国界，这样就可以显示全世界上所有文化的字符了。Unicode只是定义了一个庞大的、全球通用的字符集，并为每个字符规定了唯一确定的编号，具体存储成什么样的字节流，取决于字符编码方案。推荐的 Unicode 编码是 UTF-8 和 UTF-16。一个汉字在 utf-8 里是三个字节存储。
+
+```java
+/**
+  * 字符集
+  *  ASCII：美国标准信息交换码。
+  *     用一个字节的7位可以表示。
+  *  ISO8859-1：拉丁码表。欧洲码表
+  *     用一个字节的8位表示。
+  *  GB2312：中国的中文编码表。最多两个字节编码所有字符
+  *  GBK：中国的中文编码表升级，融合了更多的中文文字符号。最多两个字节编码
+  *  Unicode：国际标准码，融合了目前人类使用的所有字符。为每个字符分配唯一的字符码。所有的文字都用两个字节来表示。
+  *  UTF-8：变长的编码方式，可用1-4个字节来表示一个字符。
+  */
+
+```
+
+```java
+Unicode 符号范围 => 十六进制 | UTF-8 编码 => 二进制
+0000 0000-0000 007F | 0xxxxxxx(兼容原ASCII)
+0000 0080-0000 07FF | 110xxxxx 10xxxxxx
+0000 0800-0000 FFFF | 1110xxx 10xxxxxx 10xxxxxx
+0001 0000-0010 FFFF | 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+```
+
+```java
+逸 => Unicode 编码值:\u9038 => 十六进制:9038 => 二进制:1001000000111000
+UTF-8编码:111010011000000010111000
+```
+
+![编码](./assets/编码.png)
+
+ANSI 编码通常指的平台默认编码，例如英文操作系统的 ISO-8859-1，中文系统是 GBK。Unicode 字符集只是定义字符和集合的唯一编号。Unicode 编码则是对 UTF-8、UCS-2/UTF-16 等具体编码方案的统称而已，并非具体编码方案。
+
+#### 标准输入|输出流
+
+System.in 和 System.out 分别代表了系统标准的输入和输出设备。默认输入设备是键盘，输出设备是显示器。System.in 的类型是 InputStream；System.out 的类型是 PrintStream，其是 OutputStream 的子类 FilterOutputStream 的子类。重定向即通过 System 类的 setIn，setOut 方法对默认设备进行改变。
+
+```java
+public static void setIn(InputStreamin)
+public static void setOut(PrintStreamout)
+```
+
+```java
+import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+/**
+ * 其他流的使用
+ * 1.标准的输入、输出流
+ * 2.打印流
+ * 3.数据流
+ */
+public class OtherStreamTest {
+
+    /**
+     * 1.标准的输入、输出流
+     *   1.1
+     *     System.in => 标准的输入流默认从键盘输入
+     *     System.out => 标准的输出流默认从控制台输出
+     *   1.2
+     *     System类的setIn(InputStream is) / setOut(PrintStream ps)方式重新指定输入和输出的流。
+     *
+     *   1.3
+     *     从键盘输入字符串,要求将读取到的整行字符串转成大写输出.然后继续进行输入操作,直至当输入“e”或者“exit”时，退出程序.
+     *
+     *   方法一 => 使用Scanner实现,调用next()返回一个字符串
+     *   方法二 => 使用System.in实现.System.in --->  转换流 ---> BufferedReader的readLine()
+     */
+    @Test
+    public void test(){
+        BufferedReader br = null;
+        try {
+            InputStreamReader isr = new InputStreamReader(System.in);
+            br = new BufferedReader(isr);
+
+            while (true) {
+                System.out.println("请输入字符串：");
+                String data = br.readLine();
+                if ("e".equalsIgnoreCase(data) || "exit".equalsIgnoreCase(data)) {
+                    System.out.println("程序结束");
+                    break;
+                }
+
+                String upperCase = data.toUpperCase();
+                System.out.println(upperCase);
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+    }
+}
+```
+
+#### 打印流
+
+实现将基本数据类型的数据格式转化为字符串输出。打印流 PrintStream 和 PrintWriter 提供一系列重载的 `print()` 和 `println()` 方法，用于多种数据类型的输出。PrintStream 和 PrintWriter 的输出不会抛出 IOException 异常。PrintStream 和 PrintWriter 有自动 flush 功能。PrintStream 打印的所有字符都使用平台的默认字符编码转换为字节。在需要写入字符而不是写入字节的情况下，应该使用 PrintWriter 类。System.out 返回的是 PrintStream 的实例。
+
+```java
+import org.junit.Test;
+
+import java.io.*;
+
+public class OtherStreamTest {
+    /**
+     *  打印流 PrintStream 和PrintWriter 提供了一系列重载的print() 和 println()
+     */
+    @Test
+    public void test2(){
+        PrintStream ps = null;
+        try {
+            FileOutputStream fos = new FileOutputStream(new File("./src/com/.../IO/helloIO.txt"));
+            // 创建打印输出流,设置为自动刷新模式(写入换行符或字节 '\n' 时都会刷新输出缓冲区)
+            ps = new PrintStream(fos, true);
+            if (ps != null) { // 把标准输出流(控制台输出)改成文件
+                System.setOut(ps);
+            }
+
+            for (int i = 0; i <= 255; i++) { // 输出ASCII字符
+                System.out.print((char) i);
+                if (i % 50 == 0) { // 每50个数据一行
+                    System.out.println(); // 换行
+                }
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+        }
+    }
+}
+```
+
+#### 数据流
+
+为方便操作 Java 语言的基本数据类型和 String 的数据，可以使用数据流。数据流有两个类，DataInputStream 和 DataOutputStream，分别“套接”在 InputStream 和 OutputStream 子类的流上，用于读取和写出基本数据类型与 String 类的数据。
+
+```java
+// DataInputStream 中的方法
+boolean readBoolean()	byte readByte()
+char readChar()	float readFloat()
+double readDouble()	short readShort()
+long readLong()	int readInt()
+String readUTF()	void readFully(byte[s] b)
+// DataOutputStream 中的方法
+boolean writeBoolean()	byte writeByte()
+char writeChar()	float writeFloat()
+double writeDouble()	short writeShort()
+long writeLong()	int writeInt()
+String writeUTF()	void writeFully(byte[s] b)
+```
+
+```java
+import org.junit.Test;
+
+import java.io.*;
+
+public class OtherStreamTest {
+    /**
+     * 数据流
+     * DataInputStream 和 DataOutputStream 用于读取或写出基本数据类型的变量或字符串
+     * 处理异常的话，仍然应该使用try-catch-finally.
+     */
+    @Test
+    public void test3() throws IOException {
+        // 将内存中的字符串、基本数据类型的变量写出到文件中
+        DataOutputStream dos = new DataOutputStream(new FileOutputStream("./src/com/.../IO/DataOutputStreamTest.txt"));
+        dos.writeUTF("zs");
+        dos.flush(); // 刷新操作，将内存中的数据写入文件
+        dos.writeInt(21);
+        dos.flush();
+        dos.writeBoolean(true);
+        dos.flush();
+        dos.close();
+    }
+
+    /**
+     * 将文件中存储的基本数据类型变量和字符串读取到内存中保存在变量中。
+     * 读取不同类型的数据的顺序要与当初写入文件时保存的数据的顺序一致！
+     */
+    @Test
+    public void test4() throws IOException {
+        DataInputStream dis = new DataInputStream(new FileInputStream("./src/com/.../IO/DataOutputStreamTest.txt"));
+        String name = dis.readUTF();
+        int age = dis.readInt();
+        boolean isMale = dis.readBoolean();
+
+        System.out.println("name = " + name);
+        System.out.println("age = " + age);
+        System.out.println("isMale = " + isMale);
+
+        dis.close();
+    }
+}
+```
+
+#### 对象流
+
+* 对象序列化机制
+
+OjbectOutputSteam 和 ObjectInputStream 是用于写入存储和读取基本数据类型数据或对象的处理流。序列化即用 ObjectOutputStream 类写入基本类型数据或对象的机制，反序列化即用 ObjectInputStream 类读取基本类型数据或对象的机制。ObjectOutputStream 和 ObjectInputStream 不能序列化 static 和 transient 修饰的成员变量。对象序列化机制允许把内存中的 Java 对象转换成平台无关的二进制流，从而持久地保存在磁盘上；或通过网络将这种二进制流传输到另一个网络节点。当其它程序获取了这种二进制流，就可以恢复成原来的 Java 对象。序列化的好处在于可将任何实现了 Serializable 接口的对象转化为字节数据，使其在保存和传输时可被还原。序列化是 RMI(Remote Method Invoke 远程方法调用)过程中参数和返回值都必须实现的机制，而 RMI 是 JavaEE 的基础。因此序列化机制是 JavaEE 平台的基础。
+
+如需让某个对象支持序列化机制，则必须对象所属的类及其属性是可序列化的。为让某个类可序列化，则该类必须实现 Serializable、Externalizable 两个接口之一，否则会抛出 NotSerializableException 异常。
+
+```java
+import org.junit.Test;
+
+import java.io.*;
+
+/**
+ * 对象流的使用
+ * 1.ObjectInputStream 和 ObjectOutputStream
+ * 2.用于存储和读取基本数据类型数据或对象的处理流.把Java中的对象写入到数据源中,也能把对象从数据源中还原回来.
+ */
+public class ObjectTest {
+    /**
+     * 序列化过程：将内存中的java对象保存到磁盘中或通过网络传输出去
+     * 使用ObjectOutputStream实现
+     */
+    @Test
+    public void test1(){
+        ObjectOutputStream oos = null;
+        try {
+            // 创造流
+            oos = new ObjectOutputStream(new FileOutputStream("./src/com/.../IO/ObjInputOutputStreamTest.tmp"));
+            // 制造对象
+            oos.writeObject(new String("天官赐福"));
+            // 刷新操作
+            oos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(oos != null){
+                //3.关闭流
+                try {
+                    oos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    /**
+     * 反序列化：将磁盘文件中的对象还原为内存中的一个java对象
+     * 使用ObjectInputStream来实现
+     */
+    @Test
+    public void test2(){
+        ObjectInputStream ois = null;
+        try {
+            ois = new ObjectInputStream(new FileInputStream("./src/com/.../IO/ObjInputOutputStreamTest.tmp"));
+            Object obj = ois.readObject();
+            String str = (String) obj;
+            System.out.println(str);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if(ois != null){
+                try {
+                    ois.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
+```
+
+* 自定义类实现序列化与反序列化
+
+若某个类实现 Serializable 接口，该类的对象就是可序列化的。创建一个 ObjectOutputStream，调用 ObjectOutputStream 对象的 writeObject(对象) 方法输出可序列化对象。注意写出一次，操作 `flush()` 一次。这是由于 `flush()` 方法可以强迫输出流(或缓冲的流)发送数据，即使此时缓冲区还没有填满，以此来打破这种死锁的状态。当使用输出流发送数据时，数据不能填满输出流的缓冲区时，这些数据就会被存储在输出流的缓冲区中。若此时调用关闭(close)输出流，存储在输出流的缓冲区中的数据就会丢失。反序列化应创建一个 ObjectInputStream 对象调用 `readObject()` 方法读取流中的对象。值得一提的是，若某个类的属性不是基本数据类型或 String 类型，而是引用类型，那么这个引用类型必须是可序列化的，否则拥有该类型的 Field 的类也不能序列化。
+
+```java
+import org.junit.Test;
+
+import java.io.*;
+public class ObjectTest {
+    @Test
+    public void test1(){
+        ObjectOutputStream oos = null;
+        try {
+            // 创造流
+            oos = new ObjectOutputStream(new FileOutputStream("./src/com/.../IO/ObjInputOutputStreamTest.tmp"));
+            // 制造对象
+            oos.writeObject(new String("天官赐福"));
+            // 刷新操作
+            oos.flush();
+            // custom class serialization
+            oos.writeObject(new Person("zs",21));
+            oos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(oos != null){
+                //3.关闭流
+                try {
+                    oos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    /**
+     * 反序列化：将磁盘文件中的对象还原为内存中的一个java对象
+     * 使用ObjectInputStream来实现
+     */
+    @Test
+    public void test2(){
+        ObjectInputStream ois = null;
+        try {
+            ois = new ObjectInputStream(new FileInputStream("./src/com/.../IO/ObjInputOutputStreamTest.tmp"));
+            Object obj = ois.readObject();
+            String str = (String) obj;
+            System.out.println(str);
+            Person p = (Person) ois.readObject();
+            System.out.println(p);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if(ois != null){
+                try {
+                    ois.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
+```
+
+* serialVersionUID 的理解
+
+凡是实现 Serializable 接口的类都有一个表示序列化版本标识符的静态变量 serialVersionUID 用来表明类的不同版本间的兼容性。简言之其目的是以序列化对象进行版本控制，有关各版本反序列化时是否兼容。
+
+若类没有显示定义这个静态常量，那么其值是 Java 运行时环境根据类的内部细节自动生成的。若类的实例变量做了修改，serialVersionUID 可能发生变化。故建议显式声明。
+
+简单来说，Java 的序列化机制是通过在运行时判断类的 serialVersionUID 来验证版本一致性的。在进行反序列化时，JVM 会把传来的字节流中的 serialVersionUID 与本地相应实体类的 serialVersionUID 进行比较，如果相同就认为是一致的，可以进行反序列化，否则就会出现序列化版本不一致的异常 InvalidCastException。
+
+#### 随机存取文件流
+
+RandomAccessFile 声明在 java.io 包下，但直接继承于 java.lang.Object 类。其实现了 DataInput、DataOutput 这两个接口，也就意味着这个类既可以读也可以写。RandomAccessFile 类支持“随机访问” 的方式，程序可以直接跳到文件的任意地方来读、写文件，这就使其具有支持只访问文件部分内容与可追加内容的应用性。
+
+RandomAccessFile 对象包含一个记录指针，用以标示当前读写处的位置。RandomAccessFile 类对象可以使用获取文件记录指针的当前位置的 `long getFilePointer()` 方法和将文件记录指针定位到pos位置的 `void seek(long pos)` 方法自由操作记录指针。
+
+```java
+// 构造器
+RandomAccessFile(File file, String mode)
+RandomAccessFile(String name, String mode)
+// mode参数
+r => 以只读方式打开
+rw => 打开以便读取和写入
+rwd => 打开以便读取和写入；同步文件内容的更新
+rws => 打开以便读取和写入；同步文件内容和元数据的更新
+```
+
+如果模式为只读 r。则不会创建文件，而是会去读取一个已经存在的文件，如果读取的文件不存在则会出现异常。如果模式为 rw 读写。如果文件不存在则会去创建文件，如果存在则不会创建。
+
+```java
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
+/**
+ * RandomAccessFile的使用
+ * RandomAccessFile直接继承于java.lang.Object类,实现了DataInput和DataOutput接口,既可以作为一个输入流,又可以作为一个输出流
+ * 如果RandomAccessFile作为输出流时,写出到的文件如果不存在,则在执行过程中自动创建.如果写出到的文件存在,则会对原有文件内容进行覆盖
+ */
+public class RandomAccessFileTest {
+    @Test
+    public void test1(){
+        RandomAccessFile raf1 = null;
+        RandomAccessFile raf2 = null;
+        try {
+            raf1 = new RandomAccessFile(new File("./src/com/.../IO/假装有图片.jpeg"),"r");
+            raf2 = new RandomAccessFile(new File("./src/com/.../IO/假装有图片11.jpeg"),"rw");
+
+            byte[] buffer = new byte[1024];
+            int len;
+            while((len = raf1.read(buffer)) != -1){
+                raf2.write(buffer,0,len);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(raf1 != null){
+                try {
+                    raf1.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(raf2 != null){
+                try {
+                    raf2.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    @Test
+    public void test2() throws IOException {
+        RandomAccessFile raf1 = new RandomAccessFile("./src/com/.../IO/randomhello.txt","rw");
+        raf1.write("abcdefg".getBytes());
+        raf1.close();
+    }
+
+    /**
+     * 使用RandomAccessFile实现数据的插入效果
+     */
+    @Test
+    public void test3() throws IOException {
+        RandomAccessFile raf1 = new RandomAccessFile("./src/com/.../IO/randomhello.txt","rw");
+
+        raf1.seek(3);//将指针调到角标为3的位置
+        // 保存指针3后面的所有数据到StringBuilder中
+        StringBuilder builder = new StringBuilder((int) new File("./src/com/.../IO/randomhello.txt").length());
+        byte[] buffer = new byte[20];
+        int len;
+        while((len = raf1.read(buffer)) != -1){
+            builder.append(new String(buffer,0,len)) ;
+        }
+        // 调回指针，写入“xyz”
+        raf1.seek(3);
+        raf1.write("xyz".getBytes());
+
+        // 将StringBuilder中的数据写入到文件中
+        raf1.write(builder.toString().getBytes());
+        raf1.close();
+    }
+}
+```
+
+#### NIO.2中Path、Paths、Files类的使用
+
+Java NIO (New IO，Non-Blocking IO) 是从Java 1.4版本开始引入的一套新的IO API，可以替代标准的 Java IO API。NIO 与原来的 IO 有同样的作用和目的，但使用的方式完全不同，NIO 支持面向缓冲区的(IO是面向流的)、基于通道的 IO 操作。NIO 将以更加高效的方式进行文件的读写操作。Java API 中提供了两套 NIO，一套是针对标准输入输出 NIO，另一套就是网络编程 NIO。
+
+```java
+|-----java.nio.channels.Channel
+    |-----FileChannel => 处理本地文件
+    |-----SocketChannell => TCP网络编程的客户端的Channel
+    |-----ServerSocketChannell => TCP网络编程的服务器端的Channel
+    |-----DatagramChannell => UDP网络编程中发送端和接收端的Channel
+```
+
+随着 JDK 7 的发布，Java 对 NIO 进行了极大的扩展，增强了对文件处理和文件系统特性的支持，以至于称为 NIO.2。因为 NIO 提供的一些功能，NIO 已经成为文件处理中越来越重要的部分。早期的 Java 只提供了一个 File 类来访问文件系统，但 File 类的功能比较有限，所提供的方法性能也不高。而且大多数方法在出错时仅返回失败，并不会提供异常信息。NIO.2 为弥补这种不足，引入了 Path 接口，代表一个平台无关的平台路径，描述了目录结构中文件的位置。Path 可以看成是 File 类的升级版本，实际引用的资源也可以不存在。
+
+```java
+// 以前IO操作
+import java.io.File;
+File file = new File(“index.html”);
+// Java7
+import java.nio.file.Path;
+import java.nio.file.Paths;
+Path path = Paths.get(“index.html”);
+```
+
+同时，NIO.2 在 java.nio.file 包下还提供 Files、Paths 工具类，Files 包含了大量静态的工具方法来操作文件；Paths 则包含了两个返回 Path 的静态工厂方法。
+
+```java
+static Pathget(String first, String … more); // 用于将多个字符串串连成路径
+static Path get(URI uri); // 返回指定uri对应的Path路径
+```
+
+### 网络编程
+
+Java 是 Internet 上的语言，从语言级上提供了对网络应用程序的支持，程序员能够很容易开发常见的网络应用程序。Java 提供的网络类库，可以实现简易的网络连接，联网的底层细节被隐藏在 Java 的本机安装系统里，由 JVM 进行控制。并且 Java 实现了一个跨平台的网络库，程序员面对的是一个统一的网络编程环境。
+
+计算机网络可以认为是把分布在不同地理区域的计算机与专门的外部设备用通信线路互连成一个规模大、功能强的网络系统，从而使众多的计算机可以方便地互相传递信息、共享硬件、软件、数据信息等资源。
+
+网络编程的目的在于直接或间接地通过网络协议与其它计算机实现数据交换，进行通讯。但网络编程中存在两个主要的问题，如何准确地定位网络上一台或多台主机或特定的应用以及找到主机后如何可靠高效地进行数据传输。
+
+#### 网络通信要素
+
+通信双方地址要求 IP 和端口号，以及一定的规则，即网络通信协议的 OSI 参考模型和
+ TCP/IP 参考模型。
+
+![网络通讯协议](./assets/网络通讯协议.png)
+
+* IP的理解与InetAddress类的实例化
+
+IP 地址即 InetAddress，是Internet 上的计算机的唯一的标识（通信实体）。本地回环地址 hostAddress 127.0.0.1 的主机名 hostName 是 localhost。
+
+IP地址可分类为 IPV4 和 IPV6。IPV4 由4个字节组成，4个0-255。大概有42亿，30亿都在北美，亚洲4亿。2011年初已经用尽，以点分十进制表示，如192.168.0.1。IPV6 有128位（16个字节），写成8个无符号整数，每个整数用四个十六进制位表示，数之间用冒号分开，如 3ffe:3201:1401:1280:c8af:fe4d:db39:1684。
+
+IP 地址也可分类为万维网使用的公网地址和局域网使用的私有地址。192.168. 开头的就是私有地址，范围即 192.168.0.0–192.168.255.255，专门为组织机构内部使用。
+
+Internet 上的主机可使用使用域名或者 IP 表示地址。域名容易记忆，当在连接网络时输入一个主机的域名后，域名服务器 DNS 负责将域名转化成 IP 地址，这样才能和主机建立连接。
+
+InetAddress 类主要表示IP地址，其有两个子类 Inet4Address 与 Inet6Address。InetAddress 类对象含有Internet 主机地址的域名与IP地址。
+
+hosts 作用在于先在本地 etc/hosts 找域名对应 IP 地址，找不到才会进行 DNS 解析。
+
+```java
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+/**
+ * 在Java中使用InetAddress类代表IP
+ *
+ * 实例化InetAddress的两个常用方法 => getByName(String host) 、getLocalHost()
+ *        两个常用方法：getHostName() / getHostAddress()
+ *
+ * 端口号即正在计算机上运行的进程,要求不同的进程有不同的端口号,规定为一个 16 位的整数 0~65535
+ *
+ * 端口号与IP地址的组合得出一个网络套接字：Socket
+ */
+public class InetAddressTest {
+    public static void main(String[] args) {
+        try {
+            // 传入目标主机的名字 InetAddress 会尝试做连接DNS服务器并且获取IP地址的操作
+            InetAddress inet1 = InetAddress.getByName("192.168.04.22");
+            System.out.println(inet1);
+            InetAddress inet2 = InetAddress.getByName("www.google.com");
+            System.out.println(inet2);
+
+            // 获取本地ip
+            InetAddress inet4 = InetAddress.getLocalHost();
+            System.out.println(inet4);
+            // getHostName()
+            System.out.println(inet2.getHostName());
+            // getHostAddress()
+            System.out.println(inet2.getHostAddress());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+* 端口号
+
+端口号标识正在计算机上运行的进程（程序），不同的进程有不同的端口号。规定为一个 16 位的整数 0~65535。
+
+被预先定义的服务通信公认端口 0-1023（HTTP占用端口80，FTP占用端口21，Telnet占用端口23）；分配给用户进程或应用程序的注册端口 1024-49151（Tomcat占用端口8080，MySQL占用端口3306，Oracle占用端口1521）；以及动态/私有端口 49152-65535。端口号与IP地址的组合得出一个网络套接字 Socket。
+
+#### 网络协议
+
+计算机网络中实现通信必须有一些约定，即通信协议，对速率、传输代码、代码结构、传输控制步骤、出错控制等制定标准。
+
+传输层协议中有两个非常重要的协议，传输控制协议 TCP(Transmission Control Protocol) 和用户数据报协议 UDP(User Datagram Protocol)。
+
+TCP/IP 以其传输控制协议(TCP)和网络互联协议(IP)而得名，实际上是一组协议，包括多个具有不同功能且互为关联的协议。IP(Internet Protocol) 协议是网络层的主要协议，支持网间互连的数据通信。TCP/IP协议模型从更实用的角度出发，形成了高效的四层体系结构，即物理链路层、IP层、传输层和应用层。
+
+使用 TCP 协议前，须先建立 TCP 连接，形成传输数据通道。传输前，采用“三次握手”方式，点对点通信，是可靠的。TCP协议进行通信的两个应用进程是客户端、服务端。在连接中可进行大数据量的传输，传输完毕需释放已建立的连接，效率低。
+
+UDP 协议将数据、源、目的封装成数据包，不需要建立连接。每个数据报的大小限制在64K内。发送时不管对方是否准备好与接受到，故是不可靠的，但发送数据结束时无需释放资源，开销小，速度快。
+
+#### TCP 网络编程
+
+```java
+import org.junit.Test;
+
+import java.io.*;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+/**
+ * TCP的网络编程
+ * 客户端发送信息给服务端，服务端将数据显示在控制台上
+ */
+public class TCPTest {
+
+    // 客户端
+    @Test
+    public void client()  {
+        Socket socket = null;
+        OutputStream os = null;
+        try {
+            // 1.创建Socket对象指明服务器端的ip和端口号
+            InetAddress inet = InetAddress.getByName("127.0.0.1");
+            socket = new Socket(inet,8899);
+            // 2.获取一个输出流用于输出数据
+            os = socket.getOutputStream();
+            // 3.写出数据的操作
+            os.write("你好，我是客户端aa".getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // 4.资源的关闭
+            if(os != null){
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(socket != null){
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+    }
+    // 服务端
+    @Test
+    public void server()  {
+        ServerSocket ss = null;
+        Socket socket = null;
+        InputStream is = null;
+        ByteArrayOutputStream baos = null;
+        try {
+            // 1.创建服务器端的ServerSocket指明自己的端口号
+            ss = new ServerSocket(8899);
+            // 2.调用accept()表示接收来自于客户端的socket
+            socket = ss.accept();
+            // 3.获取输入流
+            is = socket.getInputStream();
+
+            // 不建议这样写，可能会有乱码
+//        byte[] buffer = new byte[1024];
+//        int len;
+//        while((len = is.read(buffer)) != -1){
+//            String str = new String(buffer,0,len);
+//            System.out.print(str);
+//        }
+            // 4.读取输入流中的数据
+            baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[5];
+            int len;
+            while((len = is.read(buffer)) != -1){
+                baos.write(buffer,0,len);
+            }
+
+            System.out.println(baos.toString());
+            System.out.println("收到了来自于：" + socket.getInetAddress().getHostAddress() + "的数据");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(baos != null){
+                // 5.关闭资源
+                try {
+                    baos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(is != null){
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(socket != null){
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(ss != null){
+                try {
+                    ss.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * 实现TCP的网络编程
+     * 从客户端发送文件给服务端,服务端保存到本地,并返回“发送成功”给客户端,最后关闭相应的连接.
+     */
+    @Test
+    public void test1() throws IOException {
+        Socket socket = new Socket(InetAddress.getByName("127.0.0.1"),9090);
+        OutputStream os = socket.getOutputStream();
+        FileInputStream fis = new FileInputStream(new File("./src/com/.../networkProgramming/changsha.JPEG"));
+        byte[] buffer = new byte[1024];
+        int len;
+        while((len = fis.read(buffer)) != -1){
+            os.write(buffer,0,len);
+        }
+        // 关闭数据的输出
+        socket.shutdownOutput();
+
+        // 接收来自于服务器端的数据,并显示到控制台上
+        InputStream is = socket.getInputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] bufferr = new byte[20];
+        int len1;
+        while((len1 = is.read(buffer)) != -1){
+            baos.write(buffer,0,len1);
+        }
+        System.out.println(baos.toString());
+
+        fis.close();
+        os.close();
+        socket.close();
+        baos.close();
+    }
+
+    @Test
+    public void test2() throws IOException {
+        ServerSocket ss = new ServerSocket(9090);
+        Socket socket = ss.accept();
+        InputStream is = socket.getInputStream();
+        FileOutputStream fos = new FileOutputStream(new File("./src/com/.../networkProgramming/changsha1.JPEG"));
+        byte[] buffer = new byte[1024];
+        int len;
+        while((len = is.read(buffer)) != -1){
+            fos.write(buffer,0,len);
+        }
+
+        System.out.println("图片传输完成");
+
+        // 服务器端给予客户端反馈
+        OutputStream os = socket.getOutputStream();
+        os.write("你好，照片我已收到，风景不错！".getBytes());
+
+        fos.close();
+        is.close();
+        socket.close();
+        ss.close();
+        os.close();
+    }
+}
+```
+
+#### UDP 网络编程
+
+类 DatagramSocket 和 DatagramPacket 实现了基于 UDP 协议网络程序。UDP 数据报通过数据报套接字 DatagramSocket 发送和接收，系统不保证 UDP 数据报一定能够安全送到目的地，也不能确定什么时候可以抵达。DatagramPacket 对象封装 UDP 数据报，在数据报中包含了发送端的 IP 地址和端口号以及接收端的 IP 地址和端口号。UDP 协议中每个数据报都给出完整的地址信息，因此无须建立发送方和接收方的连接。如同发快递包裹一样。
+
+流程是 DatagramSocket 与 DatagramPacket => 建立发送端与接收端 => 建立数据包 => 调用 Socket 的发送、接收方法 => 关闭 Socket。
+
+```java
+import org.junit.Test;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+
+/**
+ * UDP协议的网络编程
+ */
+public class UDPTest {
+
+    // 发送端
+    @Test
+    public void sender() throws IOException {
+        DatagramSocket socket = new DatagramSocket();
+        String str = "UDP发送端数据";
+        byte[] data = str.getBytes();
+        InetAddress inet = InetAddress.getLocalHost();
+        DatagramPacket packet = new DatagramPacket(data,0,data.length,inet,9090);
+        socket.send(packet);
+        socket.close();
+    }
+
+    // 接收端
+    @Test
+    public void receiver() throws IOException {
+        DatagramSocket socket = new DatagramSocket(9090);
+        byte[] buffer = new byte[100];
+        DatagramPacket packet = new DatagramPacket(buffer,0,buffer.length);
+        socket.receive(packet);
+        System.out.println(new String(packet.getData(),0,packet.getLength()));
+        socket.close();
+    }
+}
+```
+
+#### URL 编程
+
+* URI、URL 和 URN 的区别
+
+URI uniform resource identifier 统一资源标识符，用来唯一的标识一个资源。而 URL uniform resource locator 统一资源定位符是一种具体的 URI，即 URL 可以用来标识一个资源，而且还指明了如何 locate 这个资源。而 URN uniform resource name 统一资源命名是通过名字来标识资源，比如 mailto:java-net@java.sun.com。也就是说，URI 是以一种抽象的，高层次概念定义统一资源标识，而 URL 和 URN 则是具体的资源标识的方式。URL 和 URN 都是一种 URI。在 Java 的 URI 中，一个 URI 实例可以代表绝对的，也可以是相对的，只要符合 URI 的语法规则。而 URL 类则不仅符合语义，还包含了定位该资源的信息，因此它不能是相对的。
+
+* URL 的理解与实例化
+
+```java
+import java.net.MalformedURLException;
+import java.net.URL;
+
+public class URLTest {
+    public static void main(String[] args) {
+        try {
+            URL url = new URL("https://www.google.com.hk/images/branding/googlelogo/1x/googlelogo_light_color_272x92dp.png");
+
+//          public String getProtocol() => 获取该URL的协议名
+            System.out.println(url.getProtocol());
+//          public String getHost() => 获取该URL的主机名
+            System.out.println(url.getHost());
+//          public String getPort() => 获取该URL的端口号
+            System.out.println(url.getPort());
+//          public String getPath() => 获取该URL的文件路径
+            System.out.println(url.getPath());
+//          public String getFile() => 获取该URL的文件名
+            System.out.println(url.getFile());
+//          public String getQuery() => 获取该URL的查询名
+            System.out.println(url.getQuery());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+* URL 网络编程实现 Tomcat 服务端数据下载
+
+```java
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+public class URLTest1 {
+    public static void main(String[] args) {
+        HttpURLConnection urlConnection = null;
+        InputStream is = null;
+        FileOutputStream fos = null;
+        try {
+            URL url = new URL("http://127.0.0.1:8080/networkprogramming/p.jpg");
+
+            urlConnection = (HttpURLConnection) url.openConnection();
+
+            urlConnection.connect();
+
+            is = urlConnection.getInputStream();
+            fos = new FileOutputStream("./p.jpg");
+
+            byte[] buffer = new byte[1024];
+            int len;
+            while((len = is.read(buffer)) != -1){
+                fos.write(buffer,0,len);
+            }
+
+            System.out.println("下载完成");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // 关闭资源
+            if(is != null){
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(fos != null){
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(urlConnection != null){
+                urlConnection.disconnect();
+            }
+        }
+    }
+}
+```
+
+### 反射与动态代理
+
+#### Java反射机制概述
+
+Reflection 反射是被视为动态语言的关键，反射机制允许程序在执行期借助于 Reflection API 取得任何类的内部信息，并能直接操作任意对象的内部属性及方法。动态语言在运行代码时可根据某些条件改变自身结构，相应的运行时结构不可改变的语言就是静态语言。
+
+加载完类之后，在堆内存的方法区中就产生了一个 Class 类型的对象（一个类只有一个Class对象），这个对象就包含了完整的类的结构信息，可以通过这个对象看到类的结构。这个对象就像一面镜子，透过这个镜子看到类的结构，形象的称之为反射。
+
+在正常情况下，首先引入需要的"包类"名称，通过 new 实例化取得实例化对象。在反射的方式下，通过实例化对象的 `getClass()` 方法得到完整的"包类"情况。
+
+由上述可知，在运行时判断任意一个对象所属的类，在运行时构造任意一个类的对象，在运行时判断任意一个类所具有的成员变量和方法，在运行时获取泛型信息，在运行时调用任意一个对象的成员变量和方法，在运行时处理注解，以及生成动态代理都可以由反射机制提供支持。
+
+```java
+// 反射相关的主要API
+java.lang.Class => 代表一个类
+java.lang.reflect.Method => 代表类的方法
+java.lang.reflect.Field => 代表类的成员变量
+java.lang.reflect.Constructor => 代表类的构造器
+```
+
+```java
+import org.junit.Test;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+public class ReflectionTest {
+
+    // 反射操作
+    @Test
+    public void test1() throws Exception{
+        // Class clazz = Person.class; => Person.class 表示类本身充当 Class 实例,Java 中的 Person 更多的看作一个类型,故需要 .class
+        Class clazz = Person.class;
+        // 1.通过反射创建Person类的对象
+        Constructor cons = clazz.getConstructor(String.class,int.class); // 只返回参数类型访问权限是public的构造器
+        Object obj = cons.newInstance("zs",21);
+        Person p = (Person) obj;
+        System.out.println(p.toString());
+        // 2.通过反射调用对象指定的属性和方法
+        // 调用属性
+        Field age = clazz.getDeclaredField("age");
+        age.set(p,22);
+        System.out.println(p.toString());
+        // 调用方法
+        Method show = clazz.getDeclaredMethod("show");
+        show.invoke(p);
+
+        // 通过反射可以调用类的私有结构的
+        // 调用私有的构造器
+        Constructor cons2 = clazz.getDeclaredConstructor(String.class); // 返回参数类型的所有构造器
+        // setAccessible是启用和禁用访问安全检查的开关
+        cons2.setAccessible(true); // setAccessible具体的用处主要有方法上 method.setAccessible(true) 和属性上 field.setAccessible(true);
+        Person p1 = (Person) cons2.newInstance("gz");
+        System.out.println(p1);
+
+        // 调用私有的属性
+        Field name = clazz.getDeclaredField("name");
+        name.setAccessible(true);
+        name.set(p1,"jr");
+        System.out.println(p1);
+
+        // 调用私有的方法
+        Method showNation = clazz.getDeclaredMethod("showNation", String.class);
+        showNation.setAccessible(true);
+        String nation = (String) showNation.invoke(p1,"US");
+        // 相当于String nation = p1.showNation("US")
+        System.out.println(nation);
+    }
+}
+```
+
+通过直接 new 的方式或反射的方式都可以调用公共的结构，开发中更多直接使用直接 new 的方式。
+
+射机制与面向对象中的封装性不是矛盾的。封装性只是说建议去使用指定暴露的，并非说完全禁止私有结构属性。在能够完成操作或者更好地完成操作情况下，没有必要再通过反射去获取私有结构或者重复再造出单例的另一个对象，总的来说能够实现功能，效果相同甚至更好，就没有必要再通过反射去获取没那么有意义的结构属性或者对象。一个是解决建议怎么调用的问题，一个是能不能调用的问题。
+
+
+#### 理解Class类并获取Class实例
+
+经过 Javac 命令后，会生成一个或多个字节码文件(.class)，接着使用 java 命令对字节码文件进行解释运行。某个字节码文件加载到内存中的过程称为类的加载。加载到内存中的类，称为运行时类，此运行时类，就作为 Class 的一个实例。换句话说，Class 的实例就对应着一个运行时类。以前通过类去造对象，现在类本身也是对象，是 Class 的对象。
+
+![Class类的常用方法](./assets/class类常用方法.png)
+
+```java
+import org.junit.Test;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+public class ReflectionTest {
+    /**
+     * 获取Class实例的4种方式
+     */
+    @Test
+    public void test2() throws ClassNotFoundException {
+        // 方式一 => .class
+        Class c1 = Person.class;
+        System.out.println(c1);
+
+        // 方式二 => 通过运行时类的对象,调用getClass()
+        Person p1 = new Person();
+        Class c2 = p1.getClass();
+        System.out.println(c2);
+
+        // 方式三 => 调用Class的静态方法forName(String classPath)
+        Class c3 = Class.forName("com.....reflection.Person");
+        System.out.println(c3);
+
+        System.out.println(c1 == c2);
+        System.out.println(c1 == c3);
+
+        // 方式四 => 使用类的加载器 ClassLoader (了解)
+        ClassLoader classLoader = ReflectionTest.class.getClassLoader();
+        Class c4 = classLoader.loadClass("com.....reflection.Person");
+        System.out.println(c4);
+
+        System.out.println(c1 == c4);
+    }
+}
+```
+
+Class 除对应的运行时类外，存在其他结构也可作为 Class 实例。不论外部类或是内部类、接口、数组、枚举、注解或者基本数据类型，甚至 void 也算是 Class 实例。
+
+```java
+import org.junit.Test;
+
+import java.lang.annotation.ElementType;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+public class ReflectionTest {
+    /**
+     * Class实例
+     */
+    @Test
+    public void test4() {
+        Class s1 = Object.class;
+        Class s2 = Comparable.class;
+        Class s3 = String[].class;
+        Class s4 = int[][].class;
+        Class s5 = ElementType.class;
+        Class s6 = Override.class;
+        Class s7 = int.class;
+        Class s8 = void.class;
+        Class s9 = Class.class;
+
+        int[] a = new int[10];
+        int[] b = new int[100];
+        Class s10 = a.getClass();
+        Class s11 = b.getClass();
+        // 只要数组的元素类型与维度一样就是同一个Class
+        System.out.println(s10 == s11);
+    }
+}
+```
+
+#### 类的加载与 ClassLoader
+
+当程序主动使用某个类时，该类还未被加载到内存中，则系统会通过三个步骤来对该类进行初始化。首先进行的是<u>类的加载(Load)</u>，将类的 class 文件读入内存，并为之创建一个 java.lang.Class 对象，此过程由类加载器完成。随后进行<u>类的链接(Link)</u>，将类的二进制数据合并到 JRE 中。最后是<u>类的初始化(Initialize)</u>，即 JVM 负责对类进行初始化。
+
+ClassLoader 就是将类 class 文件字节码内容加载到内存的存在。ClassLoader 又分为四类。引导类加载器，是 JVM 自带的类加载器，负责 Java 平台核心库，常见于 String，无法直接读取。扩展类加载器负责 jre/lib/ext 目录下的 jar 包或 -D java.ext.dirs 指定目录下的 jar 包装入工作库。系统类加载器负责 java -classpath 或 -D java.class.path 所指的目录下的类与 jar 包装入工作，是最常用的加载器（包括自定义的类）。最后还有自定义类加载器。
+
+```java
+import org.junit.Test;
+
+/**
+ * 类的加载器
+ */
+public class ClassLoaderTest {
+
+    @Test
+    public void test1(){
+        // 对于自定义类 => 使用系统类加载器进行加载
+        ClassLoader classLoader = ClassLoaderTest.class.getClassLoader();
+        System.out.println(classLoader);
+        // 调用系统类加载器的getParent() => 获取扩展类加载器
+        ClassLoader classLoader1 = classLoader.getParent();
+        System.out.println(classLoader1);
+        // 调用扩展类加载器的getParent() => 无法获取引导类加载器
+        ClassLoader classLoader2 = classLoader1.getParent();
+        System.out.println(classLoader2);
+        // 引导类加载器主要负责加载java的核心类库
+        ClassLoader classLoader3 = String.class.getClassLoader();
+        System.out.println(classLoader3);
+    }
+}
+```
+
+```java
+import org.junit.Test;
+
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Properties;
+
+/**
+ * 类的加载器
+ */
+public class ClassLoaderTest {
+    // 使用 io 和 ClassLoader 加载的区别
+    @Test
+    public void test2() throws Exception {
+        Properties pros = new Properties();
+        // 此时的文件默认在当前的module下
+        // 读取配置文件的方式一 => IO
+//        FileInputStream fis = new FileInputStream("jdbcio.properties");
+//        pros.load(fis);
+
+        // 读取配置文件的方式二 => ClassLoader
+        // 配置文件默认识别为：当前module的src下
+        ClassLoader classLoader = ClassLoaderTest.class.getClassLoader();
+        InputStream is = classLoader.getResourceAsStream("jdbc.properties");
+        pros.load(is);
+
+        String user = pros.getProperty("user");
+        String age = pros.getProperty("age");
+        System.out.println("user = " + user + ",age = " + age);
+    }
+}
+```
+
+#### 通过反射创建运行时类的对象
+
+```java
+import org.junit.Test;
+
+/**
+ * 通过反射创建对应的运行时类的对象
+ */
+public class NewInstanceTest {
+    @Test
+    public void test() throws Exception {
+        Class<Person> clazz = Person.class;
+        /**
+         * newInstance() => 创建对应的运行时类的对象,内部调用了运行时类的空参的构造器
+         *
+         * 要想此方法正常的创建运行时类的对象要求 => 1.运行时类必须提供空参的构造器 2.空参的构造器的访问权限足够,通常设置为public
+         *
+         * 在javabean中要求提供一个public的空参构造器 => 1.便于通过反射创建运行时类的对象 2.便于子类继承此运行时类时,默认调用super()时保证父类有此构造器
+         */
+        Person obj = clazz.newInstance(); // 对应Person类的对象
+        System.out.println(obj);
+    }
+}
 ```
