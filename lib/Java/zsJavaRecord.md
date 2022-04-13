@@ -1726,6 +1726,278 @@ public class StringTest1 {
 }
 ```
 
+### 枚举与注解
+
+当需要定义一组常量时建议使用枚举类。在 JDK1.5 之前需要自定义枚举类，JDK 1.5 新增的 enum 关键字可以用于定义枚举类。枚举类的对象是有限个，确定的。若枚举只有一个对象, 则可以作为一种单例模式的实现方式。
+
+#### 自定义枚举类
+
+枚举类对象的属性不应允许被改动, 所以应该使用 private final 修饰。其次枚举类的使用 private final 修饰的属性应该在构造器中为其赋值。若枚举类显式的定义带参数的构造器, 则在列出枚举值时也必须对应的传入参数。
+
+```java
+/**
+ * 枚举类
+ */
+public class SeasonTest {
+    public static void main(String[] args) {
+        Season spring = Season.SPRING;
+        System.out.println(spring);
+        System.out.println(Season.SUMMER);
+    }
+}
+// 自定义枚举类
+class Season{
+    // 声明Season对象的属性 => private final
+    private final String seasonName;
+    private final String seasonDesc;
+
+    // 私有化类的构造器并给对象属性赋值
+    private Season(String seasonName,String seasonDesc){
+        this.seasonName = seasonName;
+        this.seasonDesc = seasonDesc;
+    }
+
+    // 提供当前枚举类的多个对象
+    public static final Season SPRING = new Season("春","a");
+    public static final Season SUMMER = new Season("夏","b");
+    public static final Season AUTUMN = new Season("秋","c");
+    public static final Season WINTER = new Season("冬","d");
+
+    // 其他诉求 => 获取枚举类对象的属性
+    public String getSeasonName() {
+        return seasonName;
+    }
+
+    public String getSeasonDesc() {
+        return seasonDesc;
+    }
+
+    // 其他诉求 => 提供toString()
+    @Override
+    public String toString() {
+        return "Season{" +
+                "seasonName='" + seasonName + '\'' +
+                ", seasonDesc='" + seasonDesc + '\'' +
+                '}';
+    }
+}
+```
+
+#### 使用enum关键字
+
+使用 enum 定义的枚举类默认继承了 java.lang.Enum 类，因此不能再继承其他类。枚举类的构造器只能使用 private 权限修饰符。枚举类的所有实例必须在枚举类中显式列出，以 "," 分割，";" 结束。列出的实例系统会自动添加 public static final 修饰。最后，必须在枚举类的第一行声明枚举类对象。在 JDK 1.5 中可以在 switch 表达式中使用 Enum 定义的枚举类的对象作为表达式, case 子句可以直接使用枚举值的名字, 无需添加枚举类作为限定。
+
+```java
+/**
+ * 枚举类
+ */
+public class SeasonTest {
+    public static void main(String[] args) {
+        Season spring = Season.SPRING;
+        System.out.println(spring);
+        System.out.println(Season.SUMMER);
+    }
+}
+// 自定义枚举类
+class Season{
+    // 声明Season对象的属性 => private final
+    private final String seasonName;
+    private final String seasonDesc;
+
+    // 私有化类的构造器并给对象属性赋值
+    private Season(String seasonName,String seasonDesc){
+        this.seasonName = seasonName;
+        this.seasonDesc = seasonDesc;
+    }
+
+    // 提供当前枚举类的多个对象
+    public static final Season SPRING = new Season("春","a");
+    public static final Season SUMMER = new Season("夏","b");
+    public static final Season AUTUMN = new Season("秋","c");
+    public static final Season WINTER = new Season("冬","d");
+
+    // 其他诉求 => 获取枚举类对象的属性
+    public String getSeasonName() {
+        return seasonName;
+    }
+
+    public String getSeasonDesc() {
+        return seasonDesc;
+    }
+
+    // 其他诉求 => 提供toString()
+    @Override
+    public String toString() {
+        return "Season{" +
+                "seasonName='" + seasonName + '\'' +
+                ", seasonDesc='" + seasonDesc + '\'' +
+                '}';
+    }
+}
+```
+
+#### Enum类中的常用方法
+
+| 方法                | 说明                                                                                                |
+|---------------------|-----------------------------------------------------------------------------------------------------|
+| values()            | 返回枚举类型的对象数组 => 遍历所有的枚举值                                                          |
+| valueOf(String str) | 把一个字符串转为对应的枚举类对象；要求字符串必须是枚举类对象的“名字”，否则 IllegalArgumentException |
+| toString()          | 返回当前枚举类对象常量的名称                                                                        |
+
+```java
+// == 常用方法 ==
+        // values() => 返回所有的枚举类对象构成的数组
+        EnumSeason[] values = EnumSeason.values();
+        for(int i = 0;i < values.length;i++){
+            System.out.println(values[i]);
+        }
+        System.out.println("****************************");
+        Thread.State[] values1 = Thread.State.values();
+        for(int i = 0;i < values1.length;i++){
+            System.out.println(values1[i]);
+        }
+
+        // valueOf(String objName) => 返回枚举类中对象名是objName的对象
+        EnumSeason winter = EnumSeason.valueOf("WINTER");
+        // 如果没有objName的枚举类对象则抛异常 => IllegalArgumentException
+//        EnumSeason winter = EnumSeason.valueOf("WINTER1");
+        System.out.println(winter);
+```
+
+#### 注解的理解
+
+从 JDK 5.0 开始, Java 增加了对元数据 MetaData 的支持, 也就是注解 Annotation。注解其实就是代码里的特殊标记, 这些标记可以在编译, 类加载, 运行时被读取, 并执行相应的处理。通过使用 Annotation, 开发者可以在不改变原有逻辑的情况下, 在源文件中嵌入一些补充信息。代码分析工具、开发工具和部署工具可以通过这些补充信息进行验证或者进行部署。Annotation 可以像修饰符一样被使用, 常见于修饰包、类、构造器、方法、成员变量、参数、局部变量的声明，这些信息被保存在 Annotation 的 "name=value" 对中。
+
+在 JavaSE 注解的使用目的比较简单，常见于标记过时的功能，忽略警告等。在 JavaEE/Android 中注解占据更重要的角色，可用来配置应用程序的任何切面，代替 JavaEE 旧版中所遗留的繁冗代码和 XML 配置等。未来的开发模式都是基于注解的，JPA 是基于注解的，Spring2.5 以上都是基于注解的，Hibernate3.x 以后也是基于注解的，现在的 Struts2 有一部分也是基于注解的了，注解是一种趋势，一定程度上可以说框架等于注解、反射加上设计模式。
+
+#### Annotation的使用示例
+
+使用 Annotation 时要在其前面增加 @ 符号, 并把该 Annotation 当成一个修饰符使用。用于修饰所支持的程序元素。
+
+<u>在生成文档相关的注解时</u>，@author 标明开发该类模块的作者，多个作者之间使用 "," 分割；@version 标明该类模块的版本；@see 参考转向相关主题；@since 从历史版本开始增加；@param 对方法中某参数的说明，无参可略；@return 对方法返回值的说明，void 可略；@exception 对方法可能抛出的异常进行说明，没有用 throws 显式抛出的异常就省略。
+
+<u>在编译时进行格式检查时</u>，@Override 限定重写父类方法, 只能用于方法；@Deprecated 表示所修饰的元素、类、方法等已过时；@SuppressWarnings 抑制编译器警告。
+
+<u>跟踪代码依赖性，实现替代配置文件功能时</u>，Servlet3.0 提供注解，使得不再需要在 web.xml 文件中进行 Servlet 的部署；spring 框架中关于“事务”的管理。
+
+```java
+@SuppressWarnings({ "unused", "rawtypes" })
+```
+
+#### 自定义注解
+
+定义新的 Annotation 类型使用 **@interface** 关键字。自定义注解自动继承 **java.lang.annotation.Annotation** 接口。注解的成员变量在 Annotation 定义中以无参数方法的形式来声明。其方法名和返回值定义了该成员的名字和类型，称为配置参数。类型只能是八种基本数据类型、String 类型、Class 类型、enum 类型、Annotation 类型、上述类型的数组。可以在定义 Annotation 的成员变量时为其指定初始值，指定成员变量的初始值可使用 **default** 关键字。如果只有一个参数成员，建议使用参数名为 value。如果定义的注解含有配置参数，那么使用时必须指定参数值，除非有默认值，格式是 "参数名=参数值"。如果只有一个参数成员，且名称为value，那么可以省略 "value="。没有成员定义的 Annotation 称为标记，包含成员变量的 Annotation 称为元数据 Annotation。自定义注解必须配上注解的信息处理流程才有意义。
+
+```java
+public @interface MyAnnotation {
+    String value();
+}
+// @MyAnnotation(value = "hello")
+```
+
+#### 基本的元注解的使用
+
+JDK 的元 Annotation 用于修饰其他 Annotation 定义。JDK5.0 提供了4个标准的 meta-annotation 类型分别是 Retention、Target、Documented、Inherited。
+
+@Retention 只能用于修饰一个 Annotation 定义, 用于指定该 Annotation 的生命周期，其包含一个 RetentionPolicy 类型的成员变量, 使用 @Rentention 时必须为该 value 成员变量指定值。
+
+| 指定值                  | 说明                                                                                   |
+|-------------------------|----------------------------------------------------------------------------------------|
+| RetentionPolicy.SOURCE  | 在源文件中有效（即源文件保留），编译器直接丢弃这种策略的注释。                         |
+| RetentionPolicy.CLASS   | 在 class 文件中有效（即 class 保留），当运行 Java 程序时, JVM 不会保留注解。           |
+| RetentionPolicy.RUNTIME | 运行时有效（即运行时保留），当运行 Java 程序时, JVM 会保留注释。可通过反射获取该注释。 |
+
+![Retention](./assets/Retention.png)
+
+@Target 用于指定被修饰的 Annotation 能用于修饰哪些程序元素，其也包含一个名为 value 的成员变量。
+
+| 取值           | 说明                    |
+|----------------|-------------------------|
+| CONSTRUCTOR    | 描述构造器              |
+| FIELD          | 描述域                  |
+| LOCAL VARIABLE | 描述局部变量            |
+| METHOD         | 描述方法                |
+| PACKAGE        | 描述包                  |
+| PARAMETER      | 描述参数                |
+| TYPE           | 描述类、接口、enum 声明 |
+
+@Documented 用于指定被该元 Annotation 修饰的 Annotation 类将被 javadoc 工具提取成文档。默认情况下，javadoc 是不包括注解的。定义为 Documented 的注解必须设置 Retention 值为 RUNTIME。
+
+@Inherited 被它修饰的 Annotation 将具有继承性。若某个类使用了被 @Inherited 修饰的 Annotation, 则其子类将自动具有该注解。实际应用中使用较少。
+
+#### 利用反射获取注解信息
+
+JDK 5.0 在 java.lang.reflect 包下新增了 AnnotatedElement 接口，该接口代表程序中可以接受注解的程序元素。当一个 Annotation 类型被定义为运行时 Annotation 后，该注解才是运行时可见，当 class 文件被载入时保存在 class 文件中的 Annotation 才会被虚拟机读取
+程序可以调用 AnnotatedElement 对象的如下方法来访问 Annotation 信息。
+
+#### jdk8可重复注解与类型注解
+
+Java 8 对注解处理提供了两点改进，可重复的注解以及可用于类型的注解。此外反射也得到了加强，在 Java8 中能够得到方法参数的名称，简化标注在方法参数上的注解。
+
+总结实现重复注解步骤。首先在 MyAnotation 上声明 @Repeatable，成员值为 MyAnnotations.class。其次保证 MyAnnotation 和 MyAnnotations 的生命周期与修饰结构一致。最后即可在需要重复注解处使用即可。
+
+```java
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import static java.lang.annotation.ElementType.*;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE})
+// java8 前用法
+public @interface MyAnnotations {
+    MyAnnotation[] value();
+}
+```
+
+```java
+import java.lang.annotation.*;
+import static java.lang.annotation.ElementType.*;
+
+// 在需要重复注解的注解上增加 @Repeatable(xxxs.class)
+@Repeatable(MyAnnotations.class)
+// xxx和xxxs生命周期必须一致
+@Retention(RetentionPolicy.RUNTIME)
+// xxx和xxxs可修饰结构必须一致
+@Target({TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE,TYPE_PARAMETER,TYPE_USE})
+public @interface MyAnnotation {
+
+    String value() default "hello";
+
+}
+```
+
+```java
+public class AnnotationTest {
+    public static void main(String[] args) {
+    }
+}
+// java8之后
+@MyAnnotation(value = "hi")
+@MyAnnotation(value = "abc")
+
+// java8之前
+//@MyAnnotations({@MyAnnotation(value = "hi"),@MyAnnotation(value = "abc")})
+class Person{
+
+}
+```
+
+JDK1.8 之后，元注解 @Target 的参数类型 ElementType 枚举值多出 TYPE_PARAMETER、TYPE_USE。此前注解只能是在声明的地方所使用，Java8 开始，注解可以应用在任何地方。ElementType.TYPE_PARAMETER 表示该注解能写在类型变量的声明语句中（如泛型声明）。ElementType.TYPE_USE 能写在使用类型的任何语句中。
+
+```java
+...
+// 相当于注解可修饰泛型的类型
+class Generic<@MyAnnotation T>{ // TYPE_PARAMETER
+    public void show() throws @MyAnnotation RuntimeException{ // 修饰异常情况信息 => TYPE_USE
+        ArrayList<@MyAnnotation String> list = new ArrayList<>();
+        // 修饰强转的类型 => TYPE_USE
+        int num = (@MyAnnotation int) 10L;
+    }
+}
+...
+```
+
 ### 集合
 
 集合、数组都是对多个数据进行存储操作的结构，简称 Java 容器。此时的存储主要是指内存层面的存储，不涉及到持久化的存储。
@@ -1745,7 +2017,6 @@ Collection 接口是 List、Set 和 Queue 接口的父接口，其内定义的�
 
 ```java
 import org.junit.Test;
-
 import java.util.*;
 
 /**
@@ -5210,3 +5481,53 @@ public class NewInstanceTest {
     }
 }
 ```
+
+```java
+import org.junit.Test;
+
+import java.util.Random;
+
+/**
+ * 通过反射创建对应的运行时类的对象 => 动态性
+ */
+public class NewInstanceTest {
+    @Test
+    public void test2(){
+        for(int i = 0;i < 100;i++){
+            int num = new Random().nextInt(3); // 0,1,2
+            String classPath = "";
+            switch(num){
+                case 0:
+                    classPath = "java.util.Date";
+                    break;
+                case 1:
+                    classPath = "java.lang.Object";
+                    break;
+                case 2:
+                    classPath = "com.....reflection.Person";
+                    break;
+                default:break;
+            }
+            try {
+                Object obj = getInstance(classPath);
+                System.out.println(obj);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * @param classPath
+     * @return
+     * @throws Exception
+     */
+    public Object getInstance(String classPath) throws Exception {
+        Class clazz =  Class.forName(classPath);
+        return clazz.newInstance();
+    }
+}
+```
+
+#### 获取运行时类的完整结构
+
