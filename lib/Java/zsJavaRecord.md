@@ -5531,3 +5531,349 @@ public class NewInstanceTest {
 
 #### 获取运行时类的完整结构
 
+属性结构方面，Class 实例使用 `getFileds()` 方法获取当前运行时类及其父类中声明为 public 访问权限的属性，返回为 Field 类型数组，可使用增强 for 循环遍历。`getDeclaredFields()` 获取当前运行时类中声明的所有属性，但不包含父类中声明的属性。
+
+权限修饰符方面，需要在取得上述属性结构的 Field 数组情况下，对其中项使用 `getModifiers()` 方法获取 int 类型的表示，可通过基于 java.lang.reflect 下的 Modifier 类中重写的 `toString()` 方法转换为对应权限修饰符。此外，数据类型与变量名分别通过 Field 数组中的项使用 `getType()`、`getName()` 和 `getName()` 获取。
+
+需要运行时类的方法结构时，通过 Class 实例对应内存中的运行时类调用 `getMethods()` 方法，获取当前运行时类及其所有父类中声明为 public 权限的方法，返回值以 Method 数组类型进行接收。同样地，若调用 `getDeclaredMethods()` 则会返回当前运行时类中声明的所有方法，不包含父类中声明的方法，同样返回值为 Method 数组类型。
+
+在运行时类的方法内部结构层面，对 Method 数组中的项进行 `getAnnotations()` 方法以获取方法声明的注解，由于可重复注解的存在，返回值为 Annotation 的数组。权限修饰福则与属性结构的权限修饰符类似，将 Method 数组里的项调用 `getModifiers()` 方法并作为参数传递给 Modifier 类重写的 `toString()` 方法里。返回值类型需对 Method 数组中的项使用 `getReturnType()` 与 `getName()` 方法取得。在需获取形参列表时，常与获取方法名一并进行。对 Method 数组中的项分别使用 `getName()`、`getParameterTypes()` 方法取得方法名与 Class 数组类型的形参列表。对形参列表进行进行 for 循环，其中每一项调用 `getName()` 方法获取具体形参。方法不免出现异常，抛出的异常则通过对 Method 数组中的元素依次调用 `getExceptionTypes()` 获取出 Class 类型数组的返回值，遍历后调用 `getName()` 拿到具体异常类型。
+
+运行时类的构造器结构方面，对运行时类调用 `getConstructors()` 方法以获取当前运行时类中声明为 public 的构造器，返回值以 Constructor 数组进行接收。调用 `getDeclaredConstructors()` 则获取当前运行时类中声明的所有的构造器，同样以 Constructor 数组接收。
+
+如需获取运行时类的父类及父类的泛型是，可对运行时类分别调用 `getSuperclass()`、`getGenericSuperclass` 获取运行时类的父类以及运行时类的带泛型的父类。至于获取运行时类的带泛型的父类的泛型，则在获取带泛型父类的 Type 类型的返回值后，进行 ParameterizedType 类型强转（接收也是 ParameterizedType 类型变量）。此时再对接收变量调用 `getActualTypeAtguments()` 方法获取 Type 类型数组返回值，即泛型类型，需要名称勿忘遍历时的 `getName()` 方法。
+
+至于运行时类的接口、所在包方面，对运行时类调用 `getInterfaces()` 可获取 Class 类型数组的返回值，即接口。显而易见，获取运行时类的父类实现的接口则对运行时类连续调用 `getSuperclass()` 与 `getInterfaces()` 方法即可。运行时类所在包则调用运行时类的 `getPackage()` 方法获取 Package 类型的返回值。
+
+#### 调用运行时类的指定结构
+
+```java
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.*;
+
+@Target({TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MyAnnotation {
+    String value() default "hello reflection";
+}
+```
+
+```java
+public interface MyInterface {
+    void info();
+}
+```
+
+```java
+import java.io.Serializable;
+
+public abstract class Creature <T> implements Serializable {
+    private char gender;
+    public double weight;
+
+    private void survive(){
+        System.out.println("creature survive method");
+    }
+
+    public void multiply(){
+        System.out.println("creature multiply method");
+    }
+}
+```
+
+```java
+@MyAnnotation(value="java")
+public class Human extends Creature<String> implements Comparable<String>,MyInterface{
+    private String name;
+    int age;
+    public int id;
+
+    public Human() {
+    }
+
+    @MyAnnotation(value="nodejs")
+    Human(String name){
+        this.name = name;
+    }
+
+    private Human(String name,int age){
+        this.name = name;
+        this.age = age;
+    }
+
+    @MyAnnotation
+    private String makehappy(String way){
+        System.out.println("makehappy from" + way);
+        return way;
+    }
+
+    public static void staticMethod(){
+        System.out.println("It's a staticMethod");
+    }
+
+    @Override
+    public void info() {
+        System.out.println("&#x5730;&#x7403;");
+    }
+
+    public String display(String gender,int age) throws Exception{
+        return gender + age;
+    }
+
+    @Override
+    public int compareTo(String o) {
+        return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                ", id=" + id +
+                '}';
+    }
+}
+```
+
+```java
+import org.junit.Test;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+public class GetSpecifiedContentTest {
+    @Test
+    public void testField1() throws Exception {
+        Class clazz = Human.class;
+
+        // 创建运行时类的对象
+        Human h = (Human) clazz.newInstance();
+
+        // 获取指定的属性 => 要求运行时类中属性声明为public
+        // 通常不采用此方法
+        Field id = clazz.getField("id");
+
+        // 设置当前属性的值
+        // set() => 参数1指明设置哪个对象的属性;参数2指明将此属性值设置为多少
+        id.set(h,9527);
+
+        // 获取当前属性的值
+        // get() => 参数1：获取哪个对象的当前属性值
+        int hId = (int) id.get(h);
+        System.out.println(hId);
+    }
+    @Test
+    public void testField2() throws Exception {
+        Class clazz = Human.class;
+
+        // 创建运行时类的对象
+        Human h = (Human) clazz.newInstance();
+
+        // 1. getDeclaredField(String fieldName) 获取运行时类中指定变量名的属性
+        Field name = clazz.getDeclaredField("name");
+
+        // 2.保证当前属性是可访问的
+        name.setAccessible(true);
+
+        // 3.获取、设置指定对象的此属性值
+        name.set(h,"zs");
+        System.out.println(name.get(h));
+    }
+    /**
+     * 操作运行时类中的指定的方法 -- 掌握
+     */
+    @Test
+    public void testMethod3() throws Exception {
+        Class clazz = Human.class;
+        // 创建运行时类的对象
+        Human h = (Human) clazz.newInstance();
+
+        // 1.获取指定的某个方法
+        //getDeclaredMethod() => 参数1指明获取的方法的名称、参数2指明获取的方法的形参列表
+        Method makehappy = clazz.getDeclaredMethod("makehappy", String.class);
+
+        // 2.保证当前方法是可访问的
+        makehappy.setAccessible(true);
+
+        // 3.调用方法的invoke() => 参数1方法的调用者、参数2给方法形参赋值的实参
+        // invoke()的返回值即为对应类中调用的方法的返回值
+        Object returnValue = makehappy.invoke(h,"makemoney");
+        System.out.println(returnValue);
+
+        System.out.println("-------------调用静态方法测试-------------");
+
+        Method staticMethod = clazz.getDeclaredMethod("staticMethod");
+        staticMethod.setAccessible(true);
+//      静态方法直接运行时类调用故可以省略为 null
+//      Object returnVal = staticMethod.invoke(null);
+        Object returnVal = staticMethod.invoke(Human.class);
+//      如果调用的运行时类中的方法没有返回值,则此 invoke() 返回 null
+        System.out.println(returnVal); // null
+    }
+    /**
+     * 调用运行时类中指定构造器
+     */
+    @Test
+    public void testConstructor() throws Exception {
+        Class clazz = Human.class;
+
+        // 1.获取指定的构造器
+        // getDeclaredConstructor() => 参数指明构造器的参数列表
+        Constructor constructor = clazz.getDeclaredConstructor(String.class);
+
+        // 2.保证此构造器是可访问的
+        constructor.setAccessible(true);
+
+        // 3.调用此构造器创建运行时类的对象
+        Human hum = (Human) constructor.newInstance("zszy");
+        System.out.println(hum);
+    }
+}
+```
+
+#### 动态代理
+
+代理设计模式即使用一个代理将对象包装起来，然后用该代理对象取代原始对象。任何对原始对象的调用都要通过代理。代理对象决定是否以及何时将方法调用转到原始对象上。
+
+静态代理的特征是代理类和目标对象的类在编译期间就确定下来，不利于程序的扩展。动态代理是指通过代理类来调用其它对象的方法，并且是在程序运行时根据需要动态创建目标类的代理对象。
+
+```java
+/**
+ * 静态代理
+ */
+interface StaticProxyProduceFactory{
+    void produceBehaviors();
+}
+
+// 代理类
+class Staticproxy implements StaticProxyProduceFactory{
+    private StaticProxyProduceFactory sppf; // 用被代理类对象进行实例化
+    public Staticproxy(StaticProxyProduceFactory sppf){
+        this.sppf = sppf;
+    }
+    @Override
+    public void produceBehaviors() {
+        System.out.println("Ready to work");
+
+        sppf.produceBehaviors();
+
+        System.out.println("End of work");
+    }
+}
+
+// 被代理类
+class ProxiedStatically implements StaticProxyProduceFactory{
+    @Override
+    public void produceBehaviors() {
+        System.out.println("ProxiedStatically");
+    }
+}
+
+public class StaticProxyTest {
+    public static void main(String[] args) {
+        // 创建被代理类的对象
+        StaticProxyProduceFactory bei = new ProxiedStatically();
+
+        // 创建代理类的对象
+        Staticproxy proxyPaperFactory = new Staticproxy(bei);
+
+        proxyPaperFactory.produceBehaviors();
+    }
+}
+```
+
+```java
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+/**
+ * 动态代理
+ */
+public class DynamicProxytest {
+    public static void main(String[] args) {
+        // 被代理类的对象
+        PassiveProxy pp = new PassiveProxy();
+        // 代理类对象
+        DynamicProxyProduceFactory dppf = (DynamicProxyProduceFactory) DynamicProxy.getProxyInstance(pp);
+        // 当通过代理类对象调用方法时会自动的调用被代理类中同名的方法
+        String dynamicproxymethod = dppf.dynamicproxymethod();
+        System.out.println(dynamicproxymethod);
+        dppf.produceBehaviors("zs sth dppf sth");
+        // 动态展示 => 追加前静态代理类进行动态创建代理类测试
+        ProxiedStatically proxiedStatically = new ProxiedStatically();
+        StaticProxyProduceFactory proxyInstance = (StaticProxyProduceFactory)DynamicProxy.getProxyInstance(proxiedStatically);
+//        Excerption => Cannot resolve method 'produceBehaviors' in 'Object'
+//        Object proxyInstance = DynamicProxy.getProxyInstance(proxiedStatically);
+        proxyInstance.produceBehaviors();
+    }
+}
+/**
+ * 实现动态代理需要解决的问题
+ * 1.如何根据加载到内存中的被代理类动态的创建一个代理类及其对象
+ * 2.当通过代理类的对象调用方法时如何动态的去调用被代理类中的同名方法
+ */
+
+interface DynamicProxyProduceFactory{
+    String dynamicproxymethod();
+    void produceBehaviors(String sth);
+}
+
+// 被代理类
+class PassiveProxy implements DynamicProxyProduceFactory{
+
+    @Override
+    public void produceBehaviors(String sth) {
+        System.out.println("Passive agent class starts action" + sth);
+    }
+    @Override
+    public String dynamicproxymethod(){
+        return "dynamicproxymethod no args";
+    }
+}
+
+class DynamicProxy {
+    // 调用此方法返回一个代理类的对象
+    public static Object getProxyInstance(Object obj){
+        GenerateHandler handler = new GenerateHandler();
+        handler.bind(obj);
+        return Proxy.newProxyInstance(obj.getClass().getClassLoader(),obj.getClass().getInterfaces(),handler); // 1
+    }
+}
+
+class GenerateHandler implements InvocationHandler { // 2
+    private Object obj; // 需要使用被代理类的对象进行赋值
+
+    public void bind(Object obj){
+        this.obj = obj;
+    }
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        // method 即为代理类对象调用的方法.此方法也就作为了被代理类对象要调用的方法
+        // obj 被代理类的对象
+        // AOP! => AOP代理里的方法可以在执行目标方法之前、之后插入一些通用处理
+        GeneralMethodAOP gmaop = new GeneralMethodAOP();
+        gmaop.method1();
+        Object returnValue = method.invoke(obj,args);
+        // 上述方法的返回值就作为当前类中的 invoke() 的返回值
+        gmaop.method2();
+        return returnValue;
+    }
+}
+
+class GeneralMethodAOP{
+    public void method1(){
+        System.out.println("-------GeneralMethodAOP1-------");
+
+    }
+
+    public void method2(){
+        System.out.println("-------GeneralMethodAOP2-------");
+    }
+}
+```
