@@ -5877,3 +5877,991 @@ class GeneralMethodAOP{
     }
 }
 ```
+
+### Java8 新特性
+
+![Java8](./assets/Java8%20%E6%96%B0%E7%89%B9%E6%80%A7.png)
+
+#### Lambda 表达式
+
+Lambda 是一个匿名函数，也理解为是一段可传递的代码。使用 Lambda 表达式可以简洁紧凑代码风格，使 Java 的语言表达能力进行提升。
+
+```java
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.function.Consumer;
+
+public class LambdaTest {
+    /**
+     * -> => lambda 操作符 或 箭头操作符
+     * -> 左边 => lambda 形参列表（接口中的抽象方法的形参列表）
+     * -> 右边 => lambda 体（重写的抽象方法的方法体）
+     * 在类型推断下 lambda 形参列表的参数类型可以省略；如果 lambda 形参列表只有一个参数，其一对()也可以省略
+     * lambda 体应使用一对{}包裹；若 lambda 体只有一条执行语句(或return)可省略这一对{}和return关键字
+     */
+    // 语法 => 无参无返回值
+    @Test
+    public void test1(){
+        Runnable r1 = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("noargsnoreturn");
+            }
+        };
+        r1.run();
+        Runnable r2 = () -> System.out.println("lambda:noargsnoreturn");
+        r2.run();
+    }
+
+    // 语法 => 一个参数无返回值
+    @Test
+    public void test2(){
+        Consumer<String> con = new Consumer<String>() {
+            @Override
+            public void accept(String s) {
+                System.out.println(s);
+            }
+        };
+        con.accept("一个参数无返回值");
+        Consumer<String> c1 = (String s) -> {
+            System.out.println(s);
+        };
+        c1.accept("lambda:一个参数无返回值");
+    }
+
+    // 语法 => 因类型推断数据类型省略
+    @Test
+    public void test3(){
+        Consumer<String> c1 = (String s) -> {
+            System.out.println(s);
+        };
+        c1.accept("因类型推断数据类型省略");
+        Consumer<String> c2 = (s) -> {
+            System.out.println(s);
+        };
+        c2.accept("lambda:因类型推断数据类型省略");
+    }
+
+    // 语法 => Lambda 一个参数时小括号省略
+    @Test
+    public void test4(){
+        Consumer<String> c1 = (s) -> {
+            System.out.println(s);
+        };
+        c1.accept("Lambda 一个参数时小括号省略");
+        Consumer<String> c2 = s -> {
+            System.out.println(s);
+        };
+        c2.accept("Lambda 一个参数时小括号省略");
+    }
+
+    // 语法 => 两个或以上的参数执行多条语句并有返回值
+    @Test
+    public void test5(){
+        Comparator<Integer> c1 = new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                System.out.println(o1);
+                System.out.println(o2);
+                return o1.compareTo(o2);
+            }
+        };
+        System.out.println(c1.compare(18,22));
+        Comparator<Integer> com2 = (o1,o2) -> {
+            System.out.println(o1);
+            System.out.println(o2);
+            return o1.compareTo(o2);
+        };
+        System.out.println(com2.compare(19,21));
+    }
+
+    // 语法 => 当 Lambda 体只有一条语句时 return 与大括号可以省略
+    @Test
+    public void test6(){
+        Comparator<Integer> c1 = (o1, o2) -> {
+            return o1.compareTo(o2);
+        };
+        System.out.println(c1.compare(4,22));
+        Comparator<Integer> c2 = (o1,o2) -> o1.compareTo(o2);
+        System.out.println(c2.compare(18,21));
+    }
+
+    @Test
+    public void test7(){
+        Consumer<String> c1 = s -> {
+            System.out.println(s);
+        };
+        c1.accept("...");
+        Consumer<String> c2 = s -> System.out.println(s);
+        c2.accept(".");
+    }
+}
+```
+
+#### 函数式接口
+
+Lambda 表达式的本质是作为函数式接口的实例，因其不是函数，而是对象，故必须依附于一类特别的对象类型——函数式接口。这就是 Lambda 表达式和函数式接口的关系。只要一个对象是函数式接口的实例，那么该对象就可以用 Lambda 表达式来表示。以前用匿名实现类表示的现在都可以用 Lambda 表达式来写。若一个接口中只声明了一个抽象方法，则此接口就称为函数式接口。可以在一个接口上使用 `@FunctionalInterface` 注解检查其是否是一个函数式接口。
+
+```java
+/**
+ * 自定义函数式接口
+ */
+public interface MyInterFace {
+    void method();
+}
+```
+
+![Java内置的函数式接口](./assets/Java内置的函数式接口.png)
+
+```java
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
+/**
+ * java内置的4大核心函数式接口
+ * 消费型接口 Consumer<T>     void accept(T t)
+ * 供给型接口 Supplier<T>     T get()
+ * 函数型接口 Function<T,R>   R apply(T t)
+ * 断定型接口 Predicate<T>    boolean test(T t)
+ */
+public class FuncInterfacesTest {
+    public void happyTime(String name, Consumer<String> con) {
+        con.accept(name);
+    }
+
+    @Test
+    public void test1(){
+        happyTime("zs", new Consumer<String>() {
+            @Override
+            public void accept(String n) {
+                System.out.println("bugfixedby" + n);
+            }
+        });
+        // Lambda 表达式
+        happyTime("zs",name -> System.out.println("bugfixedby" + name));
+    }
+
+    // 根据给定的规则过滤集合中的字符串 => Predicate
+    public List<String> filterString(List<String> list, Predicate<String> pre){
+        ArrayList<String> filterList = new ArrayList<>();
+        for(String s : list){
+            if(pre.test(s)){
+                filterList.add(s);
+            }
+        }
+        return filterList;
+    }
+
+    @Test
+    public void test2(){
+        List<String> list = Arrays.asList("虞朝","夏","商","周");
+        List<String> filterStrs = filterString(list, new Predicate<String>() {
+            @Override
+            public boolean test(String s) {
+                return s.contains("朝");
+            }
+        });
+        System.out.println(filterStrs);
+        List<String> filterStrs1 = filterString(list,s -> s.contains("朝"));
+        System.out.println(filterStrs1);
+    }
+}
+```
+
+#### 方法引用与构造器引用
+
+要传递给 Lambda 体的操作已经有实现的方法时，就可以使用方法引用。方法引用可看做是 Lambda 表达式深层次的表达。换句话说，方法引用就是 Lambda 表达式，即函数式接口的一个实例。要求实现接口的抽象方法的参数列表和返回值类型必须与方法引用的方法的参数列表和返回值类型保持一致。格式使用操作符 "::" 将类或对象与方法名分隔开来。
+
+```java
+public class Employee {
+
+    private int id;
+    private String name;
+    private int age;
+    private double salary;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(double salary) {
+        this.salary = salary;
+    }
+
+    public Employee() {
+        System.out.println("Employee().....");
+    }
+
+    public Employee(int id) {
+        this.id = id;
+        System.out.println("Employee(int id).....");
+    }
+
+    public Employee(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Employee(int id, String name, int age, double salary) {
+
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.salary = salary;
+    }
+
+    @Override
+    public String toString() {
+        return "Employee{" + "id=" + id + ", name='" + name + '\'' + ", age=" + age + ", salary=" + salary + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        Employee employee = (Employee) o;
+
+        if (id != employee.id)
+            return false;
+        if (age != employee.age)
+            return false;
+        if (Double.compare(employee.salary, salary) != 0)
+            return false;
+        return name != null ? name.equals(employee.name) : employee.name == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = id;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + age;
+        temp = Double.doubleToLongBits(salary);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+}
+```
+
+```java
+import org.junit.Test;
+
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.function.*;
+
+/**
+ * 使用格式 => 类(或对象) :: 方法名
+ *
+ * 方法引用三种情况
+ *    情况1     对象 :: 非静态方法
+ *    情况2     类 :: 静态方法
+ *    情况3     类 :: 非静态方法
+ *
+ * 方法引用要求接口中的抽象方法的形参列表和返回值类型与方法引用的方法的形参列表和返回值类型相同（情况1和情况2）
+ */
+public class MethodRefTest {
+
+    // 对象 :: 实例方法
+    // Consumer中的void accept(T t)
+    // PrintStream中的void println(T t)
+    @Test
+    public void test1() {
+        Consumer<String> c1 = str -> System.out.println(str);
+        c1.accept("cs");
+        PrintStream ps = System.out;
+        Consumer<String> c2 = ps::println;
+        c2.accept("zs");
+    }
+
+    // Supplier中的T get()
+    // Employee中的String getName()
+    @Test
+    public void test2() {
+        Employee emp = new Employee(006,"zs",21,99999);
+        Supplier<String> sp1 = () -> emp.getName();
+        System.out.println(sp1.get());
+        Supplier<String> sp2 = emp::getName;
+        System.out.println(sp2.get());
+    }
+    // 类 :: 静态方法
+    // Comparator中的int compare(T t1,T t2)
+    // Integer中的int compare(T t1,T t2)
+    @Test
+    public void test3() {
+        Comparator<Integer> com1 = (t1, t2) -> Integer.compare(t1,t2);
+        System.out.println(com1.compare(21,20));
+        Comparator<Integer> com2 = Integer::compare;
+        System.out.println(com2.compare(18,21));
+    }
+
+    // Function中的R apply(T t)
+    // Math中的Long round(Double d)
+    @Test
+    public void test4() {
+        Function<Double,Long> func = new Function<Double, Long>() {
+            @Override
+            public Long apply(Double d) {
+                return Math.round(d);
+            }
+        };
+        Function<Double,Long> func1 = d -> Math.round(d);
+        System.out.println(func1.apply(16.3));
+        Function<Double,Long> func2 = Math::round;
+        System.out.println(func2.apply(17.8));
+    }
+    // 类 :: 实例方法
+    // Comparator中的int comapre(T t1,T t2)
+    // String中的int t1.compareTo(t2)
+    @Test
+    public void test5() {
+        Comparator<String> com1 = (s1,s2) -> s1.compareTo(s2);
+        System.out.println(com1.compare("abc","abb"));
+        Comparator<String> com2 = String :: compareTo;
+        System.out.println(com2.compare("abd","abe"));
+    }
+
+    // BiPredicate中的boolean test(T t1, T t2);
+    // String中的boolean t1.equals(t2)
+    @Test
+    public void test6() {
+        BiPredicate<String,String> pre1 = (s1, s2) -> s1.equals(s2);
+        System.out.println(pre1.test("SOS","SOS"));
+        BiPredicate<String,String> pre2 = String :: equals;
+        System.out.println(pre2.test("SOS","Sos"));
+    }
+
+    // Function中的R apply(T t)
+    // Employee中的String getName();
+    @Test
+    public void test7() {
+        Employee employee = new Employee(007, "James Bond", 31, 888888);
+        Function<Employee,String> f1 = e -> e.getName();
+        System.out.println(f1.apply(employee));
+        Function<Employee,String> f2 = Employee::getName;
+        System.out.println(f2.apply(employee));
+    }
+    /**
+     * 构造器引用和方法引用类似，函数式接口的抽象方法的形参列表和构造器的形参列表一致。抽象方法的返回值类型即为构造器所属的类的类型。
+     * 数组引用可以把数组看做是一个特殊的类，则写法与构造器引用一致。
+     */
+    // 构造器引用
+    // Supplier中的T get()
+    // Employee的空参构造器 Employee()
+    @Test
+    public void test8() {
+        Supplier<Employee> sup = new Supplier<Employee>() {
+            @Override
+            public Employee get() {
+                return new Employee();
+            }
+        };
+        Supplier<Employee> sp1 = () -> new Employee();
+        System.out.println(sp1.get());
+        Supplier<Employee> sp2 = Employee::new;
+        System.out.println(sp2.get());
+    }
+
+    // Function中的R apply(T t)
+    @Test
+    public void test9() {
+        Function<Integer, Employee> f1 = id -> new Employee(id);
+        Employee employee = f1.apply(9527);
+        System.out.println(employee);
+        Function<Integer, Employee> f2 = Employee::new;
+        Employee employee1 = f2.apply(9527);
+        System.out.println(employee1);
+    }
+
+    // BiFunction中的R apply(T t,U u)
+    @Test
+    public void test10() {
+        BiFunction<Integer, String, Employee> f1 = (id, name) -> new Employee(id, name);
+        System.out.println(f1.apply(1234, "chuguo"));
+        BiFunction<Integer, String, Employee> f2 = Employee::new;
+        System.out.println(f2.apply(5678, "dongwu"));
+    }
+
+    // 数组引用
+    // Function中的R apply(T t)
+    @Test
+    public void test11() {
+        Function<Integer, String[]> f1 = length -> new String[length];
+        String[] arr1 = f1.apply(6);
+        System.out.println(Arrays.toString(arr1));
+        Function<Integer, String[]> f2 = String[]::new;
+        String[] arr2 = f2.apply(3);
+        System.out.println(Arrays.toString(arr2));
+    }
+}
+```
+
+#### Stream API
+
+java.util.stream 内的 Stream API 将真正的函数式编程风格引入到 Java，这是目前对类库最好的补充。Stream 是 Java8 中处理集合的关键抽象概念，指定希望对集合进行的操作，执行复杂的查找、过滤和映射数据等。使用 Stream API 对集合数据进行操作，就类似于使用 SQL 执行数据库操作。简而言之 Stream API 提供了一种高效且易于使用的处理数据的方式。
+
+Stream 和 Collection 集合的区别在于 Collection 是一种静态的内存数据结构，而 Stream 是有关计算的。前者是主要面向内存，存储在内存中，后者主要是面向 CPU，通过 CPU 实现计算。
+
+Stream 不会存储元素且不会改变源对象，而会返回一个持有结果的新 Stream。Stream 操作是延迟执行的。这意味着其应等到需要结果时才执行。Stream 执行流程是先进行 Stream 的实例化，再完成一系列的中间操作（过滤、映射...），最后终止操作。一旦执行终止操作，就执行中间操作链，对数据源的数据进行处理并产生结果。之后中间操作链不会再被使用。
+
+```java
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+public class StreamAPITest {
+    /**
+     * Stream的实例化
+     */
+    // 通过集合创建 Stream
+    @Test
+    public void test1(){
+        List<Employee> employees = EmployeeData.getEmployees();
+//        default Stream<E> stream() => 返回一个顺序流
+        Stream<Employee> stream = employees.stream();
+//        default Stream<E> parallelStream() => 返回一个并行流
+        Stream<Employee> parallelStream = employees.parallelStream();
+    }
+
+    // 通过数组创建 Stream
+    @Test
+    public void test2(){
+        int[] arr = new int[]{1,2,3,4,5,6};
+        // 调用Arrays类的static <T> Stream<T> stream(T[] array) => 返回一个流
+        IntStream stream = Arrays.stream(arr);
+        Employee e1 = new Employee(1011,"zs");
+        Employee e2 = new Employee(1012,"zy");
+        Employee[] arr1 = new Employee[]{e1,e2};
+        Stream<Employee> stream1 = Arrays.stream(arr1);
+    }
+    // 通过 Stream 的 of() 创建 Stream
+    @Test
+    public void test3(){
+        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5, 6);
+    }
+
+    // 创建无限流 Stream
+    @Test
+    public void test4(){
+//      迭代
+//      public static<T> Stream<T> iterate(final T seed, final UnaryOperator<T> f)
+        //遍历前10个偶数
+        Stream.iterate(0, t -> t + 2).limit(10).forEach(System.out::println);
+//      生成
+//      public static<T> Stream<T> generate(Supplier<T> s)
+        Stream.generate(Math::random).limit(10).forEach(System.out::println);
+    }
+}
+```
+
+* 中间操作筛选与切片
+
+多个中间操作可以连接起来形成一个流水线，除非流水线上触发终止操作，否则中间操作不会执行任何的处理！而在终止操作时一次性全部处理，称为“惰性求值”。
+
+| 方法                | 描述                                                                                           |
+|---------------------|------------------------------------------------------------------------------------------------|
+| filter(Predicate p) | 接收 Lambda 从流中排除某些元素                                                                 |
+| distinct()          | 筛选通过流所生成元素的 hashCode() 和 equals() 去除重复元素                                     |
+| limit(long maxSize) | 截断流使其元素不超过给定数量                                                                   |
+| skip(long n)        | 与 limit(n) 互补。跳过元素并返回一个扔掉了前 n 个元素的流。若流中元素不足 n 个则返回一个空流。 |
+
+```java
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+public class StreamAPITest {
+    /**
+     * 测试Stream的中间操作
+     */
+    // 筛选与切片
+    @Test
+    public void test5(){
+        List<Employee> list = EmployeeData.getEmployees();
+//        filter(Predicate p) => 接收 Lambda 从流中排除某些元素
+        Stream<Employee> stream = list.stream();
+        // 查询表中薪资大于7000的员工信息
+        stream.filter(e -> e.getSalary() > 7000).forEach(System.out::println);
+//        limit(n) => 截断流使其元素不超过给定数量
+        list.stream().limit(3).forEach(System.out::println);
+        System.out.println("----------");
+//        skip(n) => 跳过元素返回一个扔掉了前 n 个元素的流。若流中元素不足 n 个则返回一个空流。与 limit(n) 互补
+        list.stream().skip(3).forEach(System.out::println);
+//        distinct() => 筛选通过流所生成元素的 hashCode() 和 equals() 去除重复元素
+        list.add(new Employee(1013,"gz",22,8888));
+        list.add(new Employee(1013,"gz",22,8888));
+        list.add(new Employee(1013,"gz",22,8888));
+        list.stream().distinct().forEach(System.out::println);
+    }
+}
+```
+
+* 中间操作映射
+
+| 方法                            | 描述                                                                         |
+|---------------------------------|------------------------------------------------------------------------------|
+| map(Function f)                 | 接收一个函数作为参数，该函数会被应用到每个元素上，并将其映射成一个新的元素。 |
+| mapToDouble(ToDoubleFunction f) | 接收一个函数作为参数，该函数会被应用到每个元素上，产生一个新的DoubleStream。 |
+| mapToInt(ToIntFunction f)       | 接收一个函数作为参数，该函数会被应用到每个元素上，产生一个新的IntStream。    |
+| mapToLong(ToLongFunction f)     | 接收一个函数作为参数，该函数会被应用到每个元素上，产生一个新的LongStream。   |
+| flatMap(Function f)             | 接收一个函数作为参数，将流中的每个值都换成另一个流，然后把所有流连接成一个流 |
+
+```java
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+public class StreamAPITest {
+    // 映射
+    @Test
+    public void test6(){
+//      map(Function f) => 接收一个函数作为参数，将元素转换成其他形式或提取信息，该函数会被应用到每个元素上，并将其映射成一个新的元素。
+        List<String> list = Arrays.asList("aa", "bb", "cc", "dd");
+        list.stream().map(str -> str.toUpperCase()).forEach(System.out::print);
+
+//      获取员工姓名长度大于3的员工的姓名
+        List<Employee> employees = EmployeeData.getEmployees();
+        Stream<String> namesStream = employees.stream().map(Employee::getName);
+        namesStream.filter(name -> name.length() > 3).forEach(System.out::println);
+        System.out.println();
+//      不使用 flatMap
+        Stream<Stream<Character>> streamStream = list.stream().map(StreamAPITest::fromStringToStream);
+        streamStream.forEach(s ->{
+            s.forEach(System.out::println);
+        });
+        System.out.println("----------------");
+//      flatMap(Function f)——接收一个函数作为参数，将流中的每个值都换成另一个流，然后把所有流连接成一个流。
+        Stream<Character> characterStream = list.stream().flatMap(StreamAPITest::fromStringToStream);
+        characterStream.forEach(System.out::println);
+    }
+
+    // 将字符串中的多个字符构成的集合转换为对应的Stream的实例
+    public static Stream<Character> fromStringToStream(String str){
+        ArrayList<Character> list = new ArrayList<>();
+        for(Character c : str.toCharArray()){
+            list.add(c);
+        }
+        return list.stream();
+    }
+    // 说明flatmap
+    @Test
+    public void test7(){
+        ArrayList list1 = new ArrayList();
+        list1.add(11);
+        list1.add(22);
+        list1.add(33);
+
+        ArrayList list2 = new ArrayList();
+        list2.add(44);
+        list2.add(55);
+        list2.add(66);
+
+//        list1.add(list2);
+        list1.addAll(list2);
+        System.out.println(list1);
+    }
+}
+```
+
+* 中间操作排序
+
+| 方法                   | 描述                                 |
+|------------------------|--------------------------------------|
+| sorted()               | 产生一个新流，其中按自然顺序排序。   |
+| sorted(Comparator com) | 产生一个新流，其中按比较器顺序排序。 |
+
+```java
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+public class StreamAPITest {
+    // 排序
+    @Test
+    public void test8(){
+//      sorted() => 自然排序
+        List<Integer> list = Arrays.asList(5,10,15,0,-1,8);
+        list.stream().sorted().forEach(System.out::println);
+        // 抛异常原因 => Employee 没有实现 Comparable 接口
+//        List<Employee> employees = EmployeeData.getEmployees();
+//        employees.stream().sorted().forEach(System.out::println);
+
+
+//      sorted(Comparator com) => 定制排序
+        List<Employee> employees = EmployeeData.getEmployees();
+        employees.stream().sorted( (e1,e2) -> {
+            int ageValue = Integer.compare(e1.getAge(),e2.getAge());
+            if(ageValue != 0){
+                return ageValue;
+            }else{
+                return -Double.compare(e1.getSalary(),e2.getSalary());
+            }
+
+        }).forEach(System.out::println);
+    }
+}
+```
+
+* 终止操作匹配与查找
+
+终端操作会从流的流水线生成结果，其结果可以是任何不是流的值，就像 List、Integer 甚至是 void。流进行了终止操作后，不能再次使用。
+
+| 方法                   | 描述                                                        |
+|------------------------|-------------------------------------------------------------|
+| allMatch(Predicate p)  | 检查是否匹配所有元素                                        |
+| anyMatch(Predicate p)  | 检查是否至少匹配一个元素                                    |
+| noneMatch(Predicate p) | 检查是否没有匹配所有元素                                    |
+| findFirst()            | 返回第一个元素                                              |
+| findAny()              | 返回当前流中的任意元素                                      |
+| count()                | 返回流中元素总数                                            |
+| max(Comparator c)      | 返回流中最大值                                              |
+| min(Comparator c)      | 返回流中最小值                                              |
+| forEach(Consumer c)    | 内部迭代（Collection 接口需要用户去做迭代，称为外部迭代。） |
+
+```java
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+public class StreamAPITest {
+    // 匹配与查找
+    @Test
+    public void test9(){
+        List<Employee> employees = EmployeeData.getEmployees();
+
+//      allMatch(Predicate p) => 检查是否匹配所有元素
+//      是否所有的员工的年龄都大于23
+        boolean allMatch = employees.stream().allMatch(e -> e.getAge() > 23);
+        System.out.println(allMatch);
+
+//      anyMatch(Predicate p) => 检查是否至少匹配一个元素。
+//      是否存在员工的工资大于 9000
+        boolean anyMatch = employees.stream().anyMatch(e -> e.getSalary() > 9000);
+        System.out.println(anyMatch);
+
+//      noneMatch(Predicate p) => 检查是否没有匹配的元素
+//      是否不存在员工“Elon”
+        boolean noneMatch = employees.stream().noneMatch(e -> e.getName().startsWith("Elon"));
+        System.out.println(noneMatch);
+
+//      findFirst => 返回第一个元素
+        Optional<Employee> employee = employees.stream().findFirst();
+        System.out.println(employee);
+
+//      findAny => 返回当前流中的任意元素
+        Optional<Employee> employee1 = employees.parallelStream().findAny();
+        System.out.println(employee1);
+    }
+
+    @Test
+    public void test10(){
+        List<Employee> employees = EmployeeData.getEmployees();
+
+        // count => 返回流中元素的总个数
+        long count = employees.stream().filter(e -> e.getSalary() > 4500).count();
+        System.out.println(count);
+
+//      max(Comparator c) => 返回流中最大值
+//      返回最高的工资
+        Stream<Double> salaryStream = employees.stream().map(e -> e.getSalary());
+        Optional<Double> maxSalary = salaryStream.max(Double::compare);
+        System.out.println(maxSalary);
+
+//      min(Comparator c) => 返回流中最小值
+//      返回最低工资的员工
+        Optional<Employee> employee = employees.stream().min((e1, e2) -> Double.compare(e1.getSalary(), e2.getSalary()));
+        System.out.println(employee);
+        System.out.println();
+//      forEach(Consumer c) => 内部迭代
+        employees.stream().forEach(System.out::println);
+        // 使用集合的遍历操作
+        employees.forEach(System.out::println);
+    }
+}
+```
+
+* 终止操作归约
+
+| 方法                             | 描述                                           |
+|----------------------------------|------------------------------------------------|
+| reduce(T iden, BinaryOperator b) | 将流中元素反复结合起来得到一个值 T 返回        |
+| reduce(BinaryOperator b)         | 将流中元素反复结合起来得到一个值 Optional 返回 |
+
+```java
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+public class StreamAPITest {
+    // 归约
+    @Test
+    public void test11(){
+//      reduce(T identity, BinaryOperator) => 将流中元素反复结合得到一个值 T 返回
+//      计算1-10的自然数的和
+        List<Integer> list = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+        Integer sum = list.stream().reduce(0, Integer::sum);
+        System.out.println(sum);
+
+//      reduce(BinaryOperator) => 将流中元素反复结合起来得到一个值 Optional<T> 返回
+//      计算公司所有员工工资的总和
+        List<Employee> employees = EmployeeData.getEmployees();
+        Stream<Double> salaryStream = employees.stream().map(Employee::getSalary);
+//        Optional<Double> sumMoney = salaryStream.reduce(Double::sum);
+        Optional<Double> sumMoney = salaryStream.reduce((d1,d2) -> d1 + d2);
+        System.out.println(sumMoney.get());
+    }
+}
+```
+
+* 终止操作收集
+
+| 方法                 | 描述                                                                                  |
+|----------------------|---------------------------------------------------------------------------------------|
+| collect(Collector c) | 将流转换为其他形式。接收一个 Collector 接口的实现，用于给 Stream 中元素做汇总的方法。 |
+
+```java
+import org.junit.Test;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+public class StreamAPITest {
+    // 收集
+    @Test
+    public void test12() {
+//      collect(Collector c)——将流转换为其他形式。接收一个 Collector接口的实现，用于给Stream中元素做汇总的方法
+//      查找工资大于6000的员工结果返回为一个List或Set
+
+        List<Employee> employees = EmployeeData.getEmployees();
+        List<Employee> employeeList = employees.stream().filter(e -> e.getSalary() > 6000).collect(Collectors.toList());
+        employeeList.forEach(System.out::println);
+
+        Set<Employee> employeeSet = employees.stream().filter(e -> e.getSalary() > 6000).collect(Collectors.toSet());
+        employeeSet.forEach(System.out::println);
+    }
+}
+```
+
+#### Optional 类
+
+到目前为止，臭名昭著的空指针异常是导致 Java 应用程序失败的最常见原因。以前为了解决空指针异常，Google 公司著名的 Guava 项目引入了 Optional 类，Guava 通过使用检查空值的方式来防止代码污染，鼓励程序员写更干净的代码。受到 Google Guava 的启发，Optional 类已经成为 Java 8 类库的一部分。
+
+位于 java.util.Optional 的 Optional 类是一个容器类。保存类型 T 的值代表这个值存在；保存 null 表示这个值不存在，以此避免空指针异常。
+
+Optional 类的 Javadoc 描述这是一个可以为 null 的容器对象。如果值存在则 `isPresent()` 方法会返回 true，调用 `get()` 方法会返回该对象。
+
+| 方法                                                   | 描述                                                           |
+|--------------------------------------------------------|----------------------------------------------------------------|
+| Optional.of(T t)                                       | 创建一个 Optional 实例，t必须非空                              |
+| Optional.empty()                                       | 创建一个空的 Optional 实例                                     |
+| Optional.ofNullable(T t)                               | 创建一个 Optional 实例；t 可以为 null                          |
+| boolean isPresent()                                    | 判断是否包含对象                                               |
+| void ifPresent(Consumer<? super T> consumer)           | 如果有值就执行 Consumer 接口的实现代码，并且该值会作为参数传递 |
+| T get()                                                | 调用对象包含值并返回该值，否则抛异常                           |
+| T orElse(T other)                                      | 如果有值则将其返回，否则返回指定的 other 对象                  |
+| T orElseGet(Supplier<? extends T> other)               | 如果有值则将其返回，否则返回由 Supplier 接口实现提供的对象     |
+| T orElseThrow(Supplier<? extends X> exceptionSupplier) | 如果有值则将其返回，否则抛出由 Supplier 接口实现提供的异常     |
+
+```java
+public class LiGuan {
+    private String name;
+
+    public LiGuan() {
+    }
+
+    public LiGuan(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "LiGuan{" +
+                "name='" + name + '\'' +
+                '}';
+    }
+}
+```
+
+```java
+public class TianGuan {
+    private LiGuan LiGuan;
+
+    public TianGuan() {
+    }
+
+    public TianGuan(LiGuan LiGuan) {
+        this.LiGuan = LiGuan;
+    }
+
+    public LiGuan getLiGuan() {
+        return LiGuan;
+    }
+
+    public void setLiGuan(LiGuan LiGuan) {
+        this.LiGuan = LiGuan;
+    }
+
+    @Override
+    public String toString() {
+        return "TianGuan{" +
+                "LiGuan=" + LiGuan +
+                '}';
+    }
+}
+```
+
+```java
+import org.junit.Test;
+import java.util.Optional;
+
+/**
+ * Optional 类为避免出现空指针异常
+ */
+public class OptionalTest {
+    @Test
+    public void test1(){
+        LiGuan LiGuan = new LiGuan();
+//        LiGuan = null;
+        // of(T t) => 保证t是非空的
+        Optional<LiGuan> optionalLiGuan = Optional.of(LiGuan);
+    }
+
+    @Test
+    public void test2(){
+        LiGuan LiGuan = new LiGuan();
+//        LiGuan = null;
+        // ofNullable(T t) => t可以为null
+        Optional<LiGuan> optionalLiGuan = Optional.ofNullable(LiGuan);
+        System.out.println(optionalLiGuan);
+        // orElse(T t1) => 如果当前的Optional内部封装的t是非空的则返回内部的t;如果内部的t是空的则返回orElse()方法中的参数t1.
+        LiGuan LiGuan1 = optionalLiGuan.orElse(new LiGuan("lg"));
+        System.out.println(LiGuan1);
+    }
+
+    @Test
+    public void test3(){
+        TianGuan TianGuan = new TianGuan();
+        TianGuan = null;
+        String LiGuanName = getLiGuanName1(TianGuan);
+        System.out.println(LiGuanName);
+    }
+
+    private String getLiGuanName(TianGuan TianGuan) {
+        return TianGuan.getLiGuan().getName();
+    }
+
+    // 优化以后的getLiGuanName()
+    public String getLiGuanName1(TianGuan TianGuan){
+        if(TianGuan != null){
+            LiGuan LiGuan = TianGuan.getLiGuan();
+            if(LiGuan != null){
+                return LiGuan.getName();
+            }
+        }
+        return null;
+    }
+
+    @Test
+    public void test4(){
+        TianGuan TianGuan = new TianGuan();
+        TianGuan = null;
+        String LiGuanName = getLiGuanName1(TianGuan);
+        System.out.println(LiGuanName);
+    }
+
+    // 使用Optional类的getLiGuanName():
+    public String getLiGuanName2(TianGuan TianGuan){
+
+        Optional<TianGuan> TianGuanOptional = Optional.ofNullable(TianGuan);
+        // 此时的TianGuan1一定非空
+        TianGuan TianGuan1 = TianGuanOptional.orElse(new TianGuan(new LiGuan("周天子")));
+
+        LiGuan LiGuan = TianGuan1.getLiGuan();
+
+        Optional<LiGuan> LiGuanOptional = Optional.ofNullable(LiGuan);
+        // LiGuan1一定非空
+        LiGuan LiGuan1 = LiGuanOptional.orElse(new LiGuan("蚩尤"));
+
+        return LiGuan1.getName();
+    }
+
+    @Test
+    public void test5(){
+        TianGuan TianGuan = null;
+//        TianGuan = new TianGuan();
+//        TianGuan = new TianGuan(new LiGuan("徐福"));
+        String LiGuanName = getLiGuanName2(TianGuan);
+        System.out.println(LiGuanName);
+    }
+}
+```
